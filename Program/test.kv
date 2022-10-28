@@ -1,34 +1,23 @@
-MainPage:
+#:import Factory kivy.factory.Factory
+<MyPopup@Popup>
+    id: popik
+    auto_dismiss: True
+    title: ""
 
-<MainPage>:
-    SecondPage:
-    ThirdPage:
-
-<SecondPage@BoxLayout>:
-    orientation: "vertical"
-    Label:
-        size_hint: 1,0.05
-        text: "My QR něco"
-    MyImage:
-        source: "images/1.jpg"
-    AnchorLayout:
-        size_hint: 1, 0.1
-        pos_hint: {"bottom": 0.4}
-        Button:
-
-            size_hint: 0.8, 1
-            anchor_y: "center"
-            text: "lorem ipsum"
-    Label:
-        size_hint: 1,0.05
-        text: ""
-
-
-
-<ThirdPage@BoxLayout>:
-    orientation: "vertical"
-    MyImage:
-        source: "images/6.jpg"
+    size_hint: 0.6, 0.2
+    pos_hit: {"x":0.5, "top": 0.5}
     Button:
-        size: 10, 5
-        text: "3"
+        size_hint: 0.4, 1
+        text: "Vyhledat na internetu"
+        font_size: 24
+        on_release: root.open_website(self)
+
+
+<MainPage>
+
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+        Image:
+            id: image
+            size: root.width, root.height
