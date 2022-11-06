@@ -8,6 +8,7 @@ from kivy.core.window import Window
 from kivy.uix.popup import Popup
 import webbrowser
 from pyzbar.pyzbar import decode
+import numpy
 
 url = ""
 class MainPage(Widget):
