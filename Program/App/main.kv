@@ -1,0 +1,95 @@
+#:import Factory kivy.factory.Factory
+<MyPopup@Popup>
+    id: popik
+    auto_dismiss: True
+    title: ""
+
+    size_hint: 0.6, 0.2
+    pos_hit: {"x":0.5, "top": 0.5}
+    Button:
+        size_hint: 0.4, 1
+        text: "Vyhledat na internetu"
+        font_size: 24
+        on_release: root.open_website(self)
+
+
+<MainPage>
+    name: "MainPage"
+    id: "main"
+    BoxLayout:
+
+        orientation: "vertical"
+        size: root.width, root.height
+        GridLayout:
+            cols: 4
+            rows: 1
+            size_hint: 1,.1
+            Button:
+                text: "Main"
+                on_press: root.manager.current = 'MainPage'
+            Button:
+                text: "settings"
+                on_press: root.manager.current = 'SettingsPage'
+
+            Button:
+                text: "3"
+            Button:
+                text: "4"
+        Camera:
+            id: camera
+            play: True
+            canvas.before:
+                PushMatrix
+                Rotate:
+                    angle: -90
+                    origin: self.center
+            canvas.after:
+                PopMatrix
+<SettingsPage>
+    name: "SettingsPage"
+    BoxLayout:
+        orientation: "vertical"
+        GridLayout:
+            cols: 4
+            rows: 1
+            size_hint: 1, .1
+
+            Button:
+                text: "main"
+                on_press:
+                    root.manager.current = 'MainPage'
+
+            Button:
+                text: "settings"
+                on_press: root.manager.current = 'SettingsPage'
+            Button:
+                text: "3"
+            Button:
+                text: "4"
+
+        ScrollView:
+            size: self.size
+            GridLayout:
+                id: layout_content
+                size_hint_y: None
+                cols: 2
+                row_default_height: '20dp'
+                row_force_default: True
+                spacing: 0, 0
+                padding: 0, 0
+
+                Label:
+                    text: "Option 1"
+                    color: 0,0,0
+                    size_hint_x: 0.8
+                Switch:
+
+
+                Label:
+                    text: "Option 3"
+                    color: 0,0,0
+                    size_hint_x: 0.8
+                Label:
+                    text: "Option 4"
+                    color: 0,0,0
+                    size_hint_x: 0.2

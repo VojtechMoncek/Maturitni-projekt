@@ -10,50 +10,18 @@ import webbrowser
 from pyzbar.pyzbar import decode
 import numpy as np
 from kivy.lang import Builder
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.uix.camera import Camera
 #Builder.load_file("main.kv")
-Builder.load_string('''
-#:import Factory kivy.factory.Factory
-<MyPopup@Popup>
-    id: popik
-    auto_dismiss: True
-    title: ""
 
-    size_hint: 0.6, 0.2
-    pos_hit: {"x":0.5, "top": 0.5}
-    Button:
-        size_hint: 0.4, 1
-        text: "Vyhledat na internetu"
-        font_size: 24
-        on_release: root.open_website(self)
-
-
-<MainPage>
-
-    BoxLayout:
-        orientation: "vertical"
-        size: root.width, root.height
-        Camera:
-            id: camera
-            play: True
-
-''')
-url = ""
-class MainPage(Widget):
-    def checkbox_click(self,instance, value, text):
-        if value == True:
-            Window.clearcolor = (0.9, 0.9, 0.9, 1)
-            self.ids.labela.text = text
-        else:
-            Window.clearcolor = (0.1, 0.1, 0.1, 1)
-            self.ids.labela.text = "False"
-        print(value)
+class MainPage(Screen):
     def openPopup(self,instance):
         Factory.MyPopup().open()
         #MyPopup.title = main.url
 
 
-
+class SettingsPage(Screen):
+    pass
 class MyPopup(Popup):
 
     def __init__(self, **kwargs):
@@ -63,26 +31,35 @@ class MyPopup(Popup):
     def open_website(self, instance):
 
         webbrowser.open(self.url)
-
-class main(App):
+class ScreenManager(ScreenManager):
+    pass
+class Main(App):
     def __init__(self, **kwargs):
         # make sure we aren't overriding any important functionality
-        super(main, self).__init__(**kwargs)
+        super(Main, self).__init__(**kwargs)
         self.url = ""
     def build(self):
-        self.mainPage = MainPage()
+        self.sm = ScreenManager(transition=NoTransition())
+        self.sm.add_widget(MainPage(name='main'))
+        self.sm.add_widget(SettingsPage(name='settings'))
+
+
+
+
+        # self.mainPage = MainPage()
         Window.clearcolor = (0.9, 0.9, 0.9, 1) #background
-        self.capture = cv2.VideoCapture(0)
-        Clock.schedule_interval(self.loadVideo, 1.0 / 60.0)
-        return self.mainPage
+        # self.capture = cv2.VideoCapture(0)
+        #Clock.schedule_interval(self.loadVideo, 1.0 / 24.0)
+
+        return self.sm
     def loadVideo(self, *args):
 
 
-        camera = self.mainPage.ids["camera"]
+        camera = self.sm.get_screen("main").ids["camera"]
         cameraTexture = camera.texture
         pixels = cameraTexture.pixels
 
-        cameraTexture.flip_horizontal()
+        #cameraTexture.flip_horizontal()
         img = np.frombuffer(pixels, np.uint8)
 
         height, width = camera.texture.height, camera.texture.width
@@ -103,4 +80,4 @@ class main(App):
                 print(MyPopup().title)
                 break
 if __name__ == "__main__":
-    main().run()
+    Main().run()

@@ -1,69 +1,44 @@
-import cv2
 from kivy.app import App
-from kivy.clock import Clock
-from kivy.core.image import Texture
-from kivy.factory import Factory
-from kivy.uix.widget import Widget
-from kivy.core.window import Window
-from kivy.uix.popup import Popup
-import webbrowser
-from pyzbar.pyzbar import decode
-import numpy
+from kivy.lang import Builder
+from kivy.uix.screenmanager import ScreenManager, Screen
 
-url = ""
-class MainPage(Widget):
-    def checkbox_click(self,instance, value, text):
-        if value == True:
-            Window.clearcolor = (0.9, 0.9, 0.9, 1)
-            self.ids.labela.text = text
-        else:
-            Window.clearcolor = (0.1, 0.1, 0.1, 1)
-            self.ids.labela.text = "False"
-        print(value)
-    def openPopup(self,instance):
-        Factory.MyPopup().open()
-        #MyPopup.title = test.url
+# Create both screens. Please note the root.manager.current: this is how
+# you can control the ScreenManager from kv. Each screen has by default a
+# property manager that gives you the instance of the ScreenManager used.
+Builder.load_string("""
+<MenuScreen>:
+    BoxLayout:
+        Button:
+            text: 'Goto settings'
+            on_press: root.manager.current = 'settings'
+        Button:
+            text: 'Quit'
 
+<SettingsScreen>:
+    BoxLayout:
+        Button:
+            text: 'My settings button'
+        Button:
+            text: 'Back to menu'
+            on_press: root.manager.current = 'menu'
+""")
 
+# Declare both screens
+class MenuScreen(Screen):
+    pass
 
-class MyPopup(Popup):
+class SettingsScreen(Screen):
+    pass
 
-    def __init__(self, **kwargs):
-        # make sure we aren't overriding any important functionality
-        super(MyPopup, self).__init__(**kwargs)
-        self.url = ""
-    def open_website(self, instance):
+class TestApp(App):
 
-        webbrowser.open(self.url)
-
-class test(App):
-    def __init__(self, **kwargs):
-        # make sure we aren't overriding any important functionality
-        super(test, self).__init__(**kwargs)
-        self.url = ""
     def build(self):
-        Window.clearcolor = (0.9, 0.9, 0.9, 1) #background
-        self.capture = cv2.VideoCapture(0)
-        Clock.schedule_interval(self.loadVideo, 1.0 / 60.0)
-        return MainPage()
-    def loadVideo(self, *args):
-        succes, frame = self.capture.read()
-        buffer = cv2.flip(frame, 0).tobytes()
-        texture = Texture.create(size=(frame.shape[1], frame.shape[0]), colorfmt="bgr")
-        texture.blit_buffer(buffer, colorfmt="bgr", bufferfmt="ubyte")
+        # Create the screen manager
+        sm = ScreenManager()
+        sm.add_widget(MenuScreen(name='menu'))
+        sm.add_widget(SettingsScreen(name='settings'))
 
-        if not isinstance(App.get_running_app().root_window.children[0], Popup):
-            for qr in decode(frame):
-                print(qr.data.decode("utf-8"))
-                self.url = qr.data.decode("utf-8")
+        return sm
 
-                MP = MyPopup()
-                MP.open()
-                MP.title = qr.data.decode("utf-8")
-                MP.url = qr.data.decode("utf-8")
-                print(MyPopup().title)
-                break
-
-        self.root.ids.image.texture = texture
-if __name__ == "__main__":
-    test().run()
+if __name__ == '__main__':
+    TestApp().run()
