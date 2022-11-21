@@ -1,20 +1,422 @@
-<MainPage>:
+<NewPage@Screen>:
+    MDBottomNavigation:
+        panel_color: .2, .2, .2, 1
+        name: "NewPage"
+
+        MDBottomNavigationItem:
+
+            name: 'main'
+            text: 'Sken'
+            icon: 'camera'
+
+            BoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                MDTopAppBar:
+                    orientation: "horizontal"
+                    title: "Sken"
+                    IconRightWidget:
+                        icon: "camera"
+
+
+                Camera:
+                    id: camera
+                    play: True
+
+
+
+
+        MDBottomNavigationItem:
+            id: generate
+            name: 'generate'
+            text: 'Generovat'
+            icon: 'qrcode'
+
+            BoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                MDTopAppBar:
+                    orientation: "horizontal"
+                    title: "Generovat"
+                    IconRightWidget:
+                        icon: "qrcode"
+
+                MDBoxLayout:
+                    orientation: "vertical"
+                    padding: "20dp"
+                    adaptive_height: True
+                    MDTextField:
+                        id: input
+                        on_text_validate: app.changeTexture()
+                        padding: "20dp"
+                        pos_hint: {'center_x':0.5}
+                        hint_text: "Text"
+                        color: "Black"
+                        size_hint_x: 1
+                MDBoxLayout:
+                    orientation: "vertical"
+                    padding: "20dp"
+
+                    Image:
+                        id: generatedQr
+                        size_hint: 1,1
+                MDWidget:
+                    size_hint: 1, 0.5
+
+
+
+
+
+
+
+
+
+
+        MDBottomNavigationItem:
+            name: 'history'
+            text: 'Historie'
+            icon: 'history'
+
+            BoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                MDTopAppBar:
+                    orientation: "horizontal"
+                    title: "Historie"
+                    IconRightWidget:
+                        icon: "history"
+                ScrollView:
+                    MDBoxLayout:
+                        id: history_content
+                        orientation: "vertical"
+                        padding: "24dp"
+                        adaptive_height: True
+
+                MDWidget:
+                    size_hint: 1, 0.025
+
+
+
+
+
+
+
+
+        MDBottomNavigationItem:
+            name: 'newGenerate'
+            text: 'Nastavení'
+            icon: 'cog'
+
+            BoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                MDTopAppBar:
+                    orientation: "horizontal"
+                    title: "Nastavení"
+                    IconRightWidget:
+                        icon: "cog"
+                ScrollView:
+                    MDBoxLayout:
+                        orientation: "vertical"
+                        padding: "24dp"
+                        adaptive_height: True
+                        MyHeader:
+                            text: "Nastaveni"
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Ahoj"
+                                secondary_text: "Ahoj jak se mas"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Ahoj"
+                                secondary_text: "Ahoj jak se mas"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Ahoj"
+                                secondary_text: "Ahoj jak se mas"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Ahoj"
+                                secondary_text: "Ahoj jak se mas"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDWidget:
+                            size_hint: 1, 0.05
+                        MyHeader:
+                            text: "Kamera"
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Zapnout kameru"
+                                secondary_text: "Zapne nebo vypne kameru"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Zapnout kameru"
+                                secondary_text: "Zapne nebo vypne kameru"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Zapnout kameru"
+                                secondary_text: "Zapne nebo vypne kameru"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Zapnout kameru"
+                                secondary_text: "Zapne nebo vypne kameru"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Zapnout kameru"
+                                secondary_text: "Zapne nebo vypne kameru"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Zapnout kameru"
+                                secondary_text: "Zapne nebo vypne kameru"
+                            MDSwitch:
+                                pos_hint: {"center_y":0.4}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<MySettingsCard@MDBoxLayout>
     MDBoxLayout:
-        size_hint: 1, None
-        height: self.minimum_height
-        padding: '5dp'
+        adaptive_height: True
+        TwoLineListItem:
+            divider: None
+            text: "ahoj"
+            secondary_text: "Ahoj jak se mas"
+        MDSwitch:
+            pos_hint: {"center_y":0.4}
+<MyHeader@MDLabel>
+    bold: True
+    text: "Header"
+    color: "gray"
+    adaptive_height: True
+<GeneratePage>:
+    name: "generate"
+    MDTopAppBar:
+        title: "title"
+    #MyHeader:
+    FloatLayout:
+        #size_hint_x: None
 
-        orientation: "vertical"
-        MDIconButton:
-            icon: 'plus'
+        MDTextField:
+            id: input
+            on_text_validate: app.changeTexture()
 
-        MDLabel:
-            text: 'Instagram'
-            halign: 'center'
-            valign: 'top'
-            font_size: 25
-            #font_name: 'libs/assets/Instafont.otf'
+            pos_hint: {'center_x':0.5,'center_y': 0.85}
+            hint_text: "Text"
+            color: "Black"
+            size_hint_x: 0.5
 
-        MDIconButton:
-            icon: 'facebook-messenger'
-        ScrollView:
+        AnchorLayout:
+            padding: "40dp"
+            #spacing: 100
+            Image:
+                #pos_hint: {"x": 0,"y": 0.1}
+                #size: 1,1
+                #border_margin: "20dp"
+                id: generatedQr
+
+
+        MDFloatingActionButtonSpeedDial:
+            id: speedDial
+            data: app.speedDialReturnData()
+            root_button_anim: True
+
+<MainPage>:
+    name: "main"
+    FloatLayout:
+#        Camera:
+#            id: camera
+#            play: True
+
+        MDFloatingActionButtonSpeedDial:
+            id: speedDial
+            data: app.speedDialReturnData()
+            root_button_anim: True
+            size_hint: (0.5, 0.5)
+
+
+
+
+
+<SettingsPage>:
+    name: "settings"
+
+    padding_x: "40dp"
+    FloatLayout:
+        BoxLayout:
+
+            orientation: "vertical"
+            MDLabel:
+                size_hint: 1,.2
+                text: "Nastavení"
+                halign: "center"
+                font_size: "35dp"
+            ScrollView:
+
+                size_hint: 1,.8
+                do_scroll_x: False
+                do_scroll_y: True
+                size: self.size
+
+                GridLayout:
+                    padding: [20,0,20,0]
+                    size_hint: 1,None
+                    cols: 2
+                    #size_hint_y: None
+                    height: self.minimum_height
+                    #width: self.minimum_width
+
+                    BoxLayout:
+                        orientation: "vertical"
+                        MDLabel:
+                            title: "ahoj"
+                        MDLabel:
+                            text: "tady se nastavuje ahoj"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "Tady muzes prepnout switch, a vubec nic to neudela"
+                    MDSwitch:
+                        size_hint: None,None
+
+                    MDLabel:
+                        text: "SWITCH"
+                    MDSwitch:
+                        size_hint: None,None
+
+
+        MDFloatingActionButtonSpeedDial:
+            id: speedDial
+            data: app.speedDialReturnData()
+            root_button_anim: True
+
+
+
+
+<InfoPage>:
+    name: "info"
+    FloatLayout:
+        BoxLayout:
+            orientation: "vertical"
+            MDLabel:
+                size_hint: 1,.2
+                text: "O Aplikaci"
+                halign: "center"
+                font_size: "35dp"
+            ScrollView:
+                size_hint: 1,.8
+                do_scroll_x: False
+                do_scroll_y: True
+
+                MDLabel:
+                    text: "Tato aplikace je hrozne dobra, vlastne by se dalo rici ze je nejlepsi.\r\n\r\nLorem ipsum dolor sit amet, consectetuer adipiscing elit. Etiam egestas wisi a erat. Vivamus luctus egestas leo. In dapibus augue non sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Suspendisse sagittis ultrices augue.\r\n\r\nLorem ipsum dolor sit amet, consectetuer adipiscing elit. Etiam egestas wisi a erat. Vivamus luctus egestas leo. In dapibus augue non sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Suspendisse sagittis ultrices augue.\r\n\r\nLorem ipsum dolor sit amet, consectetuer adipiscing elit. Etiam egestas wisi a erat. Vivamus luctus egestas leo. In dapibus augue non sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Suspendisse sagittis ultrices augue.\r\n\r\nLorem ipsum dolor sit amet, consectetuer adipiscing elit. Etiam egestas wisi a erat. Vivamus luctus egestas leo. In dapibus augue non sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Suspendisse sagittis ultrices augue.\r\n\r\nLorem ipsum dolor sit amet, consectetuer adipiscing elit. Etiam egestas wisi a erat. Vivamus luctus egestas leo. In dapibus augue non sapien. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos hymenaeos. Suspendisse sagittis ultrices augue.\r\n\r\n"
+                    multiline: True
+                    font_size: "20dp"
+                    size_hint: 1,None
+                    height: self.texture_size[1]
+                    padding_x: "20dp"
+
+
+        MDFloatingActionButtonSpeedDial:
+            id: speedDial
+            data: app.speedDialReturnData()
+            root_button_anim: True
+            pos_hint: {"x":0}
