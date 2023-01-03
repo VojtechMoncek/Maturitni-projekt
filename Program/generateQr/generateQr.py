@@ -1,3 +1,4 @@
+
 import math
 import random
 
@@ -105,19 +106,22 @@ class GenerateQr():
         img = cv2.resize(img, (width,width), interpolation=cv2.INTER_AREA)
         return img
 
-    def saveImage(self, img):
-        cv2.imwrite("generatedQr.jpg", img)
+    def saveImage(self, img, name = "generatedQr.jpg"):
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+        cv2.imwrite(name, img)
 
 
 if __name__ == "__main__":
 
     generateQr = GenerateQr(50)
-    codedText = generateQr.codeText("ahoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod hoj chci nejvetsi qr kod ")
+    texts = ["masinou", "prosperujici", "vyzkumne", "pozitivnich", "podporovany", "informacnimi", "nepodminkovany", "potrebujeme nove vybaveni pro kancelar", "dneska se ucastnime konference", "nase firma se rozviji velmi rychle", "potrebujeme nove zamestnance", "vcera jsme se vratili z dovolene v Karibiku", "predstaveni noveho produktu se bude konat zitra vecer", "v nedeli rano se budeme venovat uklidu v parku", "nase skupina se bude zucastnovat mezinarodni vystavy v Nemecku", "na vylet do hor se chystame uz tento vikend", "nase spolecnost se specializuje na vyvoj aplikaci pro mobilni telefony", "dneska poobede se budeme schazet na porade o novych projektech", "v sobotu vecer se chystame na koncert oblibene kapely", "nase nove kancelarove prostory se nachazeji v centru mesta", "v patek odpoledne budeme mit prezentaci noveho projektu pred klienty", "v pristim mesici se budeme soustredit na rozsireni nasich sluzeb do dalsich statu", "v nasi firmi pracuji lidi z různých koutů světa", "v pondeli ráno se budeme věnovat schvalování nových smluv a dohod", "v úterý odpoledne se budeme účastnit konference o nových trendech v oboru", "naše společnost se zaměřuje na vývoj a výrobu inovativních technologií", "v pátek ráno se budeme scházet na poradě o plánování"]
+    for i, text in enumerate(texts):
+        codedText = generateQr.codeText(text)
 
     #qr = generateQr.createBlackImage()
-    qr = generateQr.fillImageWithData(codedText)
-    qr = generateQr.resizeQr(qr, 500)
-    generateQr.saveImage(qr)
+        qr = generateQr.fillImageWithData(codedText)
+        qr = generateQr.resizeQr(qr, 500)
+        generateQr.saveImage(qr, "qrs/" + str(i) + ".jpg")
     print(codedText)
 
 

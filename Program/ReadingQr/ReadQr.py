@@ -5,45 +5,54 @@ import numpy as np
 
 class QrReader():
     def __init__(self, img, height=1000, width=1000):
-        self.debug = 1
+        self.debug = 0
         if self.debug: print("__init__")
         self.img = img
         self.grayImg = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
         self.height = height
         self.width = width
     def loadImage(self, img):
-        self.img = img
-        #self.img = resizedImg = cv2.resize(img, (self.height,self.width), interpolation=cv2.INTER_AREA)
-        cv2.imshow("camera", img)
-        self.grayImg = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
-
-        #self.img = cv2.blur(self.img, (7, 7))
+        errorMessage = ""
+        try:
+            self.img = img
+            #self.img = resizedImg = cv2.resize(img, (self.height,self.width), interpolation=cv2.INTER_AREA)
+            cv2.imshow("camera", img)
+            self.grayImg = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+        except:
+            errorMessage = "Can not load image"
+        return errorMessage
 
     def getFourPointsContours(self, contours):
+        errorMessage = ""
         if self.debug: print("\ngetFourPointsContours()")
-
+        if len(contours) == 0: errorMessage = "No contours in argument"
 
         newContours = []
         for contour in contours:
-            approx = cv2.approxPolyDP(contour, .05 * cv2.arcLength(contour, True), True)
-            rect = cv2.minAreaRect(contour)
+            try:
+                approx = cv2.approxPolyDP(contour, .01 * cv2.arcLength(contour, True), True)
+                rect = cv2.minAreaRect(approx)
 
-            box = cv2.boxPoints(rect)
-            box = np.int0(box)
-            newContours.append(box)
-            #if len(approx) == 4:
-            #    newContours.append(approx)
+                box = cv2.boxPoints(rect)
+                box = np.int0(box)
 
+                if len(box) == 4:
+                    newContours.append(box)
+                #    newContours.append(approx)
+            except:
+                pass
         if self.debug: print(f"    {len(newContours)} contours found")
 
         _image = self.img.copy()
         #cv2.drawContours(_image, contours, -1, (255, 0, 0), 5)
-        print(newContours)
+        #print(newContours)
         #cv2.drawContours(_image,np.array( newContours ), -1, (255, 0, 0), 10)
         cv2.imshow("wtf proc nic nedelas",_image)
-        return newContours
+        if len(newContours) == 0: errorMessage = "No Four points contours in argument"
+        return newContours, errorMessage
 
     def getBiggestContour(self,contours, number=1):
+        errorMessage = ""
         if self.debug: print("\ngetBiggestContour()")
         bigContours = []
         biggestContourSize = 0
@@ -60,14 +69,17 @@ class QrReader():
         img_contours = np.zeros(self.img.shape)
         _img = self.img.copy()
         #cv2.drawContours(_img, contours, -1, (255, 0, 0), 3)
+        #print(biggestContour)
+        #cv2.drawContours(_img, biggestContour, -1, (0, 255, 0), 3)
         cv2.imshow("bgst", _img)
-        #cv2.drawContours(self.img, biggestContour, -1, (0, 255, 0), 3)
+
         #print("__Showing bigest contour")
 
-
-        return biggestContour
+        if len(biggestContour) == 0: errorMessage = "Biggest Contour not found"
+        return biggestContour, errorMessage
 
     def getContours(self, img):
+        errorMessage = ""
         if self.debug: print("\ngetContours()")
 
         ret, thresh_img = cv2.threshold(img, 120, 255, cv2.THRESH_BINARY)
@@ -80,10 +92,12 @@ class QrReader():
 
         #cv2.drawContours(self.img, contours, -1, (0, 0, 255), 1)
         cv2.imshow("thresh", thresh_img)
-
-        return contours
+        if len(contours) == 0: errorMessage = "No contours found"
+        return contours, errorMessage
 
     def warpQr(self, coordinates):
+        errorMessage = ""
+        if len(coordinates) == 0: "No coordinates given"
         if self.debug: print("\nwarpQr()")
         #print(coordinates)
 
@@ -91,48 +105,57 @@ class QrReader():
 
 
 
-        finalCoordinates = np.float32([[0, 0], [0, self.height], [self.width, self.height], [self.width, 0]])
+        #finalCoordinates = np.float32([[0, 0], [0, self.height], [self.width, self.height], [self.width, 0]])
+        finalCoordinates = np.float32([[0, 0],  [self.width, 0], [self.width, self.height], [0, self.height]])
 
-
-        matrix = cv2.getPerspectiveTransform(coordinates, finalCoordinates)
-        warpedQr = cv2.warpPerspective(self.img, matrix, (self.width, self.height))
-        #warpedQr = cv2.resize(warpedQr, (1000, 1000), interpolation=cv2.INTER_AREA)
-        self.warpedQr = warpedQr
-        return warpedQr
+        try:
+            matrix = cv2.getPerspectiveTransform(coordinates, finalCoordinates)
+            warpedQr = cv2.warpPerspective(self.img, matrix, (self.width, self.height))
+            #warpedQr = cv2.resize(warpedQr, (1000, 1000), interpolation=cv2.INTER_AREA)
+            self.warpedQr = warpedQr
+        except:
+            errorMessage = "Failed to warp qr"
+        return warpedQr, errorMessage
 
     def rotateQrAndGetNumberOfRaws(self, warpedQr):
+        errorMessage = ""
         if self.debug: print("__rotateQrAndGetNumberOfRaws__")
         def distance(coordinate, coordinate2):
-            print(coordinate, coordinate2)
+            #print(coordinate, coordinate2)
             vector = [coordinate[0] - coordinate2[0], coordinate[1] - coordinate2[1]]
             distance = abs((vector[0] ** 2 + vector[1] ** 2)) ** 1 / 2
             return distance
         def getSquaredContours(img):
             cnts = self.getContours(img)
-            fourPointsCnts = self.getFourPointsContours(cnts)
+            cnts = cnts[0]
+            cv2.drawContours(self.warpedQr, np.array(cnts[0]), -1, (0, 0, 255), 3)
+
+            fourPointsCnts, msg = self.getFourPointsContours(cnts)
 
             #cv2.drawContours(warpedQr, fourPointsCnts, -1, (255, 0, 0), 3)
 
             squaredCnts = []
             for cnt in fourPointsCnts:
-                cnt = cnt.tolist()
-                squareArea = distance(cnt[0] , cnt[1])
+                #cnt = cnt.tolist()
+
+                squareArea = distance(cnt[0], cnt[1])
                 averageEdgeLenght = (distance(cnt[0] , cnt[1]) + distance(cnt[1] , cnt[2]) + distance(cnt[2] , cnt[3]) + distance(cnt[3] , cnt[0])) / 4
                 squareArea *= 2
                 if averageEdgeLenght + averageEdgeLenght/5 >= squareArea**1/2 and averageEdgeLenght - averageEdgeLenght/5 <= squareArea**1/2:
                     squaredCnts.append(cnt)
 
-            #cv2.drawContours(self.img, np.array(squaredCnts), -1, (0, 0, 255), 1)
+
             return squaredCnts
 
         def findContourInCorner(cnts):
+            errorMessage = ""
+            cv2.drawContours(warpedQr,np.array( cnts ), -1, (0, 0, 255), 1)
+
             dic = []
             distances = []
             inCorner = []
-            inCorner2 = []
             for cnt in cnts:
 
-                #print(cnt)
                 listX = [cnt[0][0], cnt[1][0], cnt[2][0], cnt[3][0]]
                 listY = [cnt[0][1], cnt[1][1], cnt[2][1], cnt[3][1]]
                 listX.sort()
@@ -143,19 +166,22 @@ class QrReader():
                 rightX = listX[3]
                 topY = listY[0]
                 bottomY = listY[3]
-                dic.append({"cnt": cnt, "left": leftX, "right": rightX, "top": topY, "bottom": bottomY})
+
 
                 x = [leftX, self.width - leftX]
                 y = [topY, self.height - bottomY]
                 distances.append([x, y])
 
                 if x[0] > (y[0] - self.width/100) and x[0] < (y[0] + self.width/100):
+                    dic.append({"cnt": cnt, "left": leftX, "right": rightX, "top": topY, "bottom": bottomY})
                     inCorner.append(cnt)
 
                 elif x[0] > (y[1] - self.width/100) and x[0] < (y[1] + self.width/100):
+                    dic.append({"cnt": cnt, "left": leftX, "right": rightX, "top": topY, "bottom": bottomY})
                     inCorner.append(cnt)
                 else:
                     pass
+            if len(dic) == 0: return []
             closest = self.width - dic[0]["right"]
             closestCnt = dic[0]
             for square in dic:
@@ -185,8 +211,10 @@ class QrReader():
 
                         #closest = square["left"]
                         #closestCnt = square
-            #cv2.drawContours(warpedQr, np.array(inCorner), -1, (0, 0, 255), 3)
-            #cv2.drawContours(warpedQr, np.array(closestCnt["cnt"]), -1, (255, 0, 255), 10)
+            cv2.drawContours(warpedQr, np.array(inCorner), -1, (0, 255, 0), 3)
+            #cv2.drawContours(warpedQr, closestCnt["cnt"], -1, (255, 0, 255), 10)
+            cv2.imshow("aaaaaa", warpedQr)
+            if len(inCorner) == 0: errorMessage = "Corner square not found"
             return closestCnt
 
         def rotateQr(cnt):
@@ -209,12 +237,23 @@ class QrReader():
             return warpedQr_
 
         squaredCnts = getSquaredContours(warpedQr)
+
         cnt = findContourInCorner(squaredCnts)
+
+        if cnt == []: return warpedQr, 1, "Square in corner not found"
         warpedQr = rotateQr(cnt)
         cv2.imshow("wq", warpedQr)
-        raws = abs( round(self.width / ((cnt["right"] - cnt["left"]) / 3)) )
+        pixelHeight = ((cnt["right"] - cnt["left"]) / 3)
+        print(pixelHeight)
+        if pixelHeight < 1: errorMessage = "pixelHeight == 0"; pixelHeight = 10
+        raws = abs( round(self.width / pixelHeight ))
+        print(f"raws: {raws}")
+        print(f"width{self.width}")
+        print(cnt)
+        print(f"r: {cnt['right']}\nl:{cnt['left']}")
+        print(f"{(cnt['right'] - cnt['left'])}")
         #print(raws) {'cnt': [[[71, 71]], [[282, 71]], [[282, 287]], [[69, 285]]], 'left': 69, 'right': 282, 'top': 71, 'bottom': 287}
-        return warpedQr, raws
+        return warpedQr, raws, errorMessage
 
     """
     def getNumberOfRaws(self, warpedQr):
@@ -257,6 +296,7 @@ class QrReader():
         return raws
     """
     def readPixels(self, warpedQr, raws):
+        errorMessage = ""
         if self.debug: print("\nreadPixels()")
         pixelHeight = math.ceil(len(warpedQr)/raws)
         if self.debug: print(f"    Pixel Height: {pixelHeight}px (raws: {raws})")
@@ -284,17 +324,18 @@ class QrReader():
                     rawData.append(0)
 
             data.append(rawData)
-
-        return data
+        if len(data) == 0: errorMessage = "Loaded zero pixels"
+        return data, errorMessage
 
     def decodeData(self, data):
+        errorMessage = ""
         if self.debug: print("\ndecodeData()")
         def removeBorders(data):
             #return data
             if self.debug: print(f"    Data:")
             if self.debug: print(f"        With borders: {data}")
 
-            while True:
+            while len(data) > 1:
                 if (data[0].count(1) == len(data[0]) and data[-1].count(1) == len(data)) or (data[0].count(0) == len(data[0]) and data[-1].count(0) == len(data)):
                     for i, x in enumerate(data):
 
@@ -307,6 +348,8 @@ class QrReader():
                     break
 
             if self.debug: print(f"        Data without borders: {data}")
+            if len(data) == 0: errorMessage = "No data"
+
             return data
 
 
@@ -382,19 +425,30 @@ class QrReader():
             return text
         text = convertToText(data)
         if self.debug: print(f"    Text: {text}")
-        return text
+        return text, errorMessage
 
     def main(self, img):
         #resizedImg = cv2.resize(img, (1000,1000), interpolation=cv2.INTER_AREA)
         self.loadImage(img)
-        contours = self.getContours(self.grayImg)
-        fourPointContours = self.getFourPointsContours(contours)
-        biggestContour = self.getBiggestContour(fourPointContours)
-        warpedQr = self.warpQr(biggestContour)
-        warpedQr, raws = self.rotateQrAndGetNumberOfRaws(warpedQr)
-        CryptedData = self.readPixels(warpedQr, raws)
-        EncryptedData = self.decodeData(CryptedData)
-        print(raws)
+        contours, msg = self.getContours(self.grayImg)
+        print(msg)
+        fourPointContours, msg = self.getFourPointsContours(contours)
+        print(msg)
+        biggestContour, msg = self.getBiggestContour(fourPointContours)
+        print(msg)
+        warpedQr, msg = self.warpQr(biggestContour)
+        print(msg)
+        #cv2.drawContours(warpedQr, fourPointContours, -1, (0, 0, 255), 3)
+        # print(msg
+
+        warpedQr, raws, msg = self.rotateQrAndGetNumberOfRaws(warpedQr)
+        cv2.imshow("wqr", warpedQr)
+        print(msg)
+        CryptedData, msg = self.readPixels(warpedQr, raws)
+        print(msg)
+        EncryptedData, msg = self.decodeData(CryptedData)
+        print(msg)
+        print(f"raws: {raws}")
         print(EncryptedData)
         """
         try:
@@ -436,7 +490,8 @@ if __name__ == "__main__":
     cam.release()
     """
 
-    img = cv2.imread("example11.png")
+    img = cv2.imread("examples/example (7).jpg")
+    img = cv2.resize(img, (1000, 1000), interpolation=cv2.INTER_AREA)
     qrReader = QrReader(img)
     qrReader.main(img)
     cv2.imshow("kamera", img)
