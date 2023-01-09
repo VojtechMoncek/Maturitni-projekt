@@ -47,7 +47,7 @@
                     adaptive_height: True
                     MDTextField:
                         id: input
-                        on_text_validate: app.changeTexture()
+                        on_text_validate: app.changeTexture(), app.openPopup("saveQr")
                         padding: "20dp"
                         pos_hint: {'center_x':0.5}
                         hint_text: "Text"
@@ -59,6 +59,7 @@
 
                     Image:
                         id: generatedQr
+
                         size_hint: 1,1
                 MDWidget:
                     size_hint: 1, 0.5
@@ -121,39 +122,46 @@
                         padding: "24dp"
                         adaptive_height: True
                         MyHeader:
-                            text: "Nastaveni"
+                            text: "Obecné"
+
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Používat běžnou čtečku qr kódů"
+                                secondary_text: ""
+                            MDSwitch:
+                                id: StandardReading
+                                pos_hint: {"center_y":0.4}
+                                active: app.settings['StandardReading']
+                                on_active: app.updateSettings()
+                        MyHeader:
+                            text: "Optimalizace"
+                        MDBoxLayout:
+                            adaptive_height: True
+                            TwoLineListItem:
+                                divider: None
+                                text: "Frekvence hledání Qr kódu"
+                                secondary_text: "Pro změnu je nutné restartovat aplikaci"
+                            MDTextField:
+                                id: FrameRate
+                                text: app.settings['FrameRate']
+                                pos_hint: {"center_y":0.4, "center_x":0.5}
+                                halign: "center"
+                                size_hint_x: 0.1
+
+                                on_text_validate: app.updateSettings()
+
                         MDBoxLayout:
                             adaptive_height: True
                             TwoLineListItem:
                                 divider: None
                                 text: "Ahoj"
                                 secondary_text: "Ahoj jak se mas"
-                            MDSwitch:
+                            MDTextField:
+                                text: "aaa"
                                 pos_hint: {"center_y":0.4}
-                        MDBoxLayout:
-                            adaptive_height: True
-                            TwoLineListItem:
-                                divider: None
-                                text: "Ahoj"
-                                secondary_text: "Ahoj jak se mas"
-                            MDSwitch:
-                                pos_hint: {"center_y":0.4}
-                        MDBoxLayout:
-                            adaptive_height: True
-                            TwoLineListItem:
-                                divider: None
-                                text: "Ahoj"
-                                secondary_text: "Ahoj jak se mas"
-                            MDSwitch:
-                                pos_hint: {"center_y":0.4}
-                        MDBoxLayout:
-                            adaptive_height: True
-                            TwoLineListItem:
-                                divider: None
-                                text: "Ahoj"
-                                secondary_text: "Ahoj jak se mas"
-                            MDSwitch:
-                                pos_hint: {"center_y":0.4}
+                                size_hint_x: 0.1
                         MDWidget:
                             size_hint: 1, 0.05
                         MyHeader:
@@ -258,20 +266,22 @@
             color: "Black"
             size_hint_x: 0.5
 
-        AnchorLayout:
-            padding: "40dp"
-            #spacing: 100
-            Image:
-                #pos_hint: {"x": 0,"y": 0.1}
-                #size: 1,1
-                #border_margin: "20dp"
-                id: generatedQr
+            AnchorLayout:
+                padding: "40dp"
+                on_touch_up: print("touch up")
+                on_touch_down: print("touch down")
+                #spacing: 100
+                Button:
+                    text: "aaaaaaaaaaaaaaaaa"
+
+                    #id: generatedQr
+                    on_touch_up: app.saveQrImage()
+                    on_touch_up: print("touch up")
+                    on_touch_down: print("touch down")
 
 
-        MDFloatingActionButtonSpeedDial:
-            id: speedDial
-            data: app.speedDialReturnData()
-            root_button_anim: True
+
+
 
 <MainPage>:
     name: "main"
@@ -279,13 +289,6 @@
 #        Camera:
 #            id: camera
 #            play: True
-
-        MDFloatingActionButtonSpeedDial:
-            id: speedDial
-            data: app.speedDialReturnData()
-            root_button_anim: True
-            size_hint: (0.5, 0.5)
-
 
 
 
@@ -383,12 +386,6 @@
                         size_hint: None,None
 
 
-        MDFloatingActionButtonSpeedDial:
-            id: speedDial
-            data: app.speedDialReturnData()
-            root_button_anim: True
-
-
 
 
 <InfoPage>:
@@ -414,9 +411,3 @@
                     height: self.texture_size[1]
                     padding_x: "20dp"
 
-
-        MDFloatingActionButtonSpeedDial:
-            id: speedDial
-            data: app.speedDialReturnData()
-            root_button_anim: True
-            pos_hint: {"x":0}

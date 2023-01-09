@@ -2,24 +2,25 @@ import cv2
 
 qrCascade = cv2.CascadeClassifier("cascade.xml")
 
-img = cv2.imread("images/2.jpg")
+img = cv2.imread("images/5.jpg")
+
 multiplier = 1
 if img.shape[1] > img.shape[0]:
-    multiplier = 250 / img.shape[1]
+    multiplier = 1000 / img.shape[1]
 else:
-    multiplier = 2\50 / img.shape[0]
+    multiplier = 1000 / img.shape[0]
 
 width = int(img.shape[1] * multiplier)
 height = int(img.shape[0] * multiplier)
 img = cv2.resize(img, (width,height), interpolation = cv2.INTER_AREA)
 imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
+#imgGray = cv2.blur(imgGray, (7,7))
 thresh = cv2.adaptiveThreshold (imgGray,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY,11,2)
 thresh2 = cv2.adaptiveThreshold (imgGray,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,11,2)
 ret, thresh3 = cv2.threshold (imgGray,127,255,cv2.THRESH_BINARY)
 
 cv2.imshow("G img", imgGray)
-cv2.imshow("thresh", thresh)
+#cv2.imshow("thresh", thresh)
 qr = qrCascade.detectMultiScale(imgGray,1.2,5)
 
 

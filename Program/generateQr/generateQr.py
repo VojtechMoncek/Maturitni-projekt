@@ -1,14 +1,6 @@
-
 import math
-import random
-
 import cv2
 import numpy as np
-
-
-
-
-
 
 class GenerateQr():
     def __init__(self,width):
@@ -110,9 +102,17 @@ class GenerateQr():
         img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
         cv2.imwrite(name, img)
 
+    def main(self, text):
+        codedText = self.codeText(text)
+        qr = self.fillImageWithData(codedText)
+        qr = self.resizeQr(qr, 500)
+        return qr
+
 
 if __name__ == "__main__":
-
+    generateQr = GenerateQr(50)
+    qr = generateQr.main("ahoj jak se mas proc je tak kratkej")
+    """
     generateQr = GenerateQr(50)
     texts = ["masinou", "prosperujici", "vyzkumne", "pozitivnich", "podporovany", "informacnimi", "nepodminkovany", "potrebujeme nove vybaveni pro kancelar", "dneska se ucastnime konference", "nase firma se rozviji velmi rychle", "potrebujeme nove zamestnance", "vcera jsme se vratili z dovolene v Karibiku", "predstaveni noveho produktu se bude konat zitra vecer", "v nedeli rano se budeme venovat uklidu v parku", "nase skupina se bude zucastnovat mezinarodni vystavy v Nemecku", "na vylet do hor se chystame uz tento vikend", "nase spolecnost se specializuje na vyvoj aplikaci pro mobilni telefony", "dneska poobede se budeme schazet na porade o novych projektech", "v sobotu vecer se chystame na koncert oblibene kapely", "nase nove kancelarove prostory se nachazeji v centru mesta", "v patek odpoledne budeme mit prezentaci noveho projektu pred klienty", "v pristim mesici se budeme soustredit na rozsireni nasich sluzeb do dalsich statu", "v nasi firmi pracuji lidi z různých koutů světa", "v pondeli ráno se budeme věnovat schvalování nových smluv a dohod", "v úterý odpoledne se budeme účastnit konference o nových trendech v oboru", "naše společnost se zaměřuje na vývoj a výrobu inovativních technologií", "v pátek ráno se budeme scházet na poradě o plánování"]
     for i, text in enumerate(texts):
@@ -124,7 +124,8 @@ if __name__ == "__main__":
         generateQr.saveImage(qr, "qrs/" + str(i) + ".jpg")
     print(codedText)
 
-
+    """
     cv2.imshow("qr code - black", qr)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()

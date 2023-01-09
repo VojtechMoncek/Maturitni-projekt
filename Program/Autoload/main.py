@@ -1,6 +1,9 @@
+import csv
+import json
 import webbrowser
 from datetime import datetime
 
+from kivy.graphics.texture import Texture
 from kivy.uix.boxlayout import BoxLayout
 from kivymd.app import MDApp
 import qrcode
@@ -14,12 +17,14 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.clock import Clock
 
+from functools import partial
 import numpy as np
 import cv2
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.label import MDLabel
 from kivymd.uix.list import TwoLineListItem
 
+from Program.generateQr import generateQr
 
 class GeneratePage(Screen):
     pass
@@ -29,8 +34,6 @@ class SettingsPage(Screen):
     pass
 class MainPage(Screen):
     pass
-class MySpeedDial(MDFloatingActionButtonSpeedDial):
-    pass
 
 
 class newGeneratePage(Screen):
@@ -39,58 +42,156 @@ class NewPage(Screen):
     pass
 class Main(MDApp):
     def __init__(self, **kwargs):
-        # make sure we aren't overriding any important functionality
+        # DOnt overwrite anything
         super(Main, self).__init__(**kwargs)
-        self.sm = ScreenManager(transition=NoTransition())
 
-        #print( self.page.ids.tab_manager.current )
-        #print(self.page.ids.bottom_panel.current)
-        #print(self.page.ids.tab_bar.current)
+        self.sm = ScreenManager(transition=NoTransition())
+        self.settings = self.getSettings()
         self.url = ""
 
-    def openPopup(self, value):
+    def updateSettings(self):
+        """
+        update settings and check if values are possible to set
+        :return:
+        """
+        #Frame rate
+        frameRate = self.page.ids["FrameRate"].text
+        standardReading = self.page.ids["StandardReading"].active
+        print(standardReading)
 
-        if not isinstance(MDApp.get_running_app().root_window.children[0], MDDialog):
-            if value != "":
-                self.popup = MDDialog(
-                    title="obsah:",
-                    text=value,
-                    buttons=[
-                        MDFlatButton(
-                            text="Zavřít",
-                            on_release=self.closePopup,
-                            theme_text_color="Custom",
-                            text_color=self.theme_cls.primary_color,
-                        ),
-                        MDFlatButton(
-                            text="Najít na internetu",
-                            on_release=self.openWebsite,
-                            theme_text_color="Custom",
-                            text_color=self.theme_cls.primary_color,
-                        )
-                    ]
+        #Which reading use
+        self.settings["StandardReading"] = standardReading
+        self.changeTexture()
 
 
-                )
-                dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
-                # print("date and time =", dt_string)
-                with open("history.csv", "a") as f:
-                    f.write(f"{value};{dt_string}\n")
-                self.createHistoryContent(self.page.ids["history_content"])
-                self.url = value
-                self.popup.open()
-                print(f"popup otevren   data: {value}")
+        #FrameRate
+        if self.page.ids["FrameRate"].text.isdigit() and int(frameRate) <= 99:
+            self.settings["FrameRate"] = frameRate
+        else:
+            self.page.ids["FrameRate"].text = self.settings["FrameRate"]
 
-                #webbrowser.open(value)
+
+        self.saveSettings(self.settings)
+    def getSettings(self):
+        """
+        return json data in dic
+        :return:
+        """
+        with open("settings.json", "r") as f:
+            data = f.read()
+        return json.loads(data)
+    def saveSettings(self, settings):
+        """
+        setting fc
+        :param settings:
+        :return:
+        """
+        with open("settings.json", "w") as f:
+            f.write(json.dumps(self.settings))
+
+
+    def openPopup(self, actionType = "website", value = ""):
+        """
+        create and open popup
+        :param value: Text on popup
+        :return:
+        """
+
+
+        #self.page.ids["generatedQr"].texture.save("qr.png")
+        if isinstance(MDApp.get_running_app().root_window.children[0], MDDialog): return
+
+        if actionType == "website":
+            if value == "": return
+            print("# website")
+            self.popup = MDDialog(
+                title="obsah:",
+                text=value,
+                buttons=[
+                    MDFlatButton(
+                        text="Zavřít",
+                        on_release=self.closePopup,
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                    ),
+                    MDFlatButton(
+                        text="Najít na internetu",
+                        on_release=self.openWebsite,
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                    )
+                ]
+
+
+            )
+
+        elif actionType == "saveQr":
+            self.popup = MDDialog(
+                title="Uložit Qr kód?",
+                text=value,
+                buttons=[
+                    MDFlatButton(
+                        text="Zavřít",
+                        on_release=self.closePopup,
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                    ),
+                    MDFlatButton(
+                        text="Uložit",
+                        on_release=self.saveQrImage,
+                        theme_text_color="Custom",
+                        text_color=self.theme_cls.primary_color,
+                    )
+                ]
+
+            )
+        dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
+        # print("date and time =", dt_string)
+        with open("history.csv", "a") as f:
+            f.write(f"{value};{dt_string}\n")
+        self.createHistoryContent(self.page.ids["history_content"])
+        self.url = value
+        self.popup.open()
+        print(f"popup otevren   data: {value}")
+
+        #webbrowser.open(value)
     def closePopup(self, obj):
+        """
+        close popup
+        :param obj:
+        :return:
+        """
         self.popup.dismiss()
-    def openWebsite(self, obj):
+    def openWebsite(self,obj):
+        """
+        open website
+        :param obj:
+        :return:
+        """
+        print(self.url)
         webbrowser.open(self.url)
+
+
     def findQr(self, img):
-        detect = cv2.QRCodeDetector()
-        value, points, straight_qrcode = detect.detectAndDecode(img)
-        self.openPopup(value)
+        """
+        Find qr code from image
+        :param img: Image with qr
+        :return:
+        """
+        if self.settings["StandardReading"] == True:
+            detect = cv2.QRCodeDetector()
+            value, points, straight_qrcode = detect.detectAndDecode(img)
+            self.openPopup("website", value)
+        else:
+            pass
+
+
     def getFrame(self, *args):
+        """
+        Get frame from camera
+        :param args:
+        :return:
+        """
         #cam = self.sm.get_screen("main").ids["camera"]
         cam = self.page.ids["camera"]
 
@@ -109,28 +210,22 @@ class Main(MDApp):
         self.findQr(img)
 
     def changePage(self, name):
+        """
+        Turning off and on camera
+        :param name: Name of new page
+        :return:
+        """
         self.sm.current = name
 
         if self.sm.current == "main":
             self.sm.get_screen(name).ids["camera"].play = False
 
-        self.sm.get_screen(name).ids["speedDial"].close_stack()
+
 
         if self.sm.current == "main":
             self.sm.get_screen(name).ids["camera"].play = True
-    def historyReturn(self):
-        with open("history.csv", "r") as f:
-            lines = f.readlines()
-            return lines
 
-    def speedDialReturnData(self):
-        data = {
-            ' ': ['information', "on_press",lambda x: self.changePage("info")],
-            '  ': ['cog', "on_press",lambda x: self.changePage("settings")],
-            '   ': ['qrcode', "on_press",lambda x: self.changePage("newGenerate")],
-            '    ': ['camera', "on_press",lambda x: self.changePage("main")],
-         }
-        return data
+
 
     def build(self):
         self.page = NewPage()
@@ -149,39 +244,47 @@ class Main(MDApp):
         self.GeneratePage = GeneratePage()
         self.changeTexture()
         self.sm.current = "main"
-
-        Clock.schedule_interval(self.getFrame, 1.0 / 24.0)
+        print(self.settings["FrameRate"])
+        Clock.schedule_interval(self.getFrame, 1.0 / int(self.settings["FrameRate"]))
 
         print(self.page.ids)
 
         self.createHistoryContent(self.page.ids["history_content"])
         return self.page
-    def createHistoryContent(self, container):
 
+    def createHistoryContent(self, container):
+        """
+        Write history to GUI from csv
+        :param container: Id of container in GUI
+        :return:
+        """
         lines = self.historyReturn()
         print(len(container.children))
-
-        # for child in container.children:
-        #     container.remove_widget(child)
 
         while container.children:
             container.remove_widget(container.children[0])
         print(len(container.children))
-        for line in lines:
+        #data = ""
+        dList = []
+        for i, line in enumerate( reversed(lines) ):
 
             date = line.split(";")[1]
             data = line.split(";")[0]
-            def openPopup(*args):
-                self.openPopup(data)
+            dList.append((date, data))
+            print("data: " + data)
+            def openPopup(_data):
+                print(_data)
+                self.openPopup("website", str(_data))
+            opup = partial(openPopup)
             container.add_widget(
                 MDBoxLayout(
                     MDBoxLayout(
 
                         TwoLineListItem(
-                            divider =  None,
-                            text = date,
-                            secondary_text = data,
-                            on_release = openPopup
+                            divider=None,
+                            text=date,
+                            secondary_text=dList[i][1],
+                            on_release=opup
                         ),
                         adaptive_height=True,
                     ),
@@ -190,22 +293,55 @@ class Main(MDApp):
             )
         print("deti")
         print(self.page.ids["history_content"].children)
+    def historyReturn(self):
+        """
+        Getting history from csv file
+        :return: All lines from csv
+        """
+        with open("history.csv", "r") as f:
+            lines = f.readlines()
+            return lines
 
-    def onOpen(self):
-        print("open")
     def changeTexture(self):
-        imgQR = qrcode.make(self.page.ids["input"].text)
-        img = self.page.ids["generatedQr"]
-        #imgQR = qrcode.make(self.sm.get_screen("generate").ids["input"].text)
-        #img = self.sm.get_screen("generate").ids["generatedQr"]
-        img.texture = imgQR
+        """
+        Creating Qr code
+        :return:
+        """
+        text = self.page.ids["input"].text
+        if text == "": text = "rias gremory"
 
-        data = BytesIO()
-        imgQR.save(data, format='png')
-        data.seek(0)  # yes you actually need this
-        newImg = CoreImage(BytesIO(data.read()), ext='png')
-        self.page.ids["generatedQr"].texture = newImg.texture
-        print(img.texture)
+        if self.settings["StandardReading"] == True:
+            imgQR = qrcode.make(text)
+            img = self.page.ids["generatedQr"]
+            img.texture = imgQR
+
+            data = BytesIO()
+            imgQR.save(data, format='png')
+            data.seek(0)  # yes you actually need this
+            newImg = CoreImage(BytesIO(data.read()), ext='png')
+            self.page.ids["generatedQr"].texture = newImg.texture
+            print(newImg.texture)
+        else:
+            gQr = generateQr.GenerateQr(50)
+            imgQR = gQr.main(text)
+
+            cv2.cvtColor(imgQR, cv2.COLOR_BGR2RGB)
+            imgQR = cv2.rotate(imgQR, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            npQr = np.array(imgQR)
+
+            texture = Texture.create(size=(imgQR.shape[1], imgQR.shape[0]), colorfmt='bgr')
+            texture.blit_buffer(npQr.tobytes(), colorfmt='bgr', bufferfmt='ubyte')
+
+            img = self.page.ids["generatedQr"]
+            img.texture = texture
+
+
+            self.page.ids["generatedQr"].texture = img.texture
+
+    def saveQrImage(self, obj):
+        print("saving QR")
+        self.openPopup("saveQr")
+
 
 
 Main().run()

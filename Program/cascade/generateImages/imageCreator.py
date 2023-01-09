@@ -34,7 +34,7 @@ if __name__ == "__main__":
             warpedQr = cv2.warpPerspective(qr, matrix, (1000, 1000))
 
             warpedQr = imutils.rotate_bound(warpedQr, random.randrange(0,360))
-            warpedQr = generateQr.resizeQr(warpedQr, random.randrange(100, 700))
+            warpedQr = generateQr.resizeQr(warpedQr, random.randrange(30, 115))
             #cv2.imshow(f"{filename}big", lImg)
             #cv2.imshow(str(x), warpedQr)
             #warpedQr = cv2.addWeighted(warpedQr, random.randrange(4,14) /10, warpedQr, 1, 1)
@@ -60,7 +60,8 @@ if __name__ == "__main__":
         yPos = random.randrange(0, yMaxPos)
         img.paste(imgQr, (xPos, yPos), imgQr)
         img.save(ImageWithQr)
-    #createQrs()
+    createQrs()
+    """
     intI = 840
     file = os.listdir("C:/Users/moncevo19/Downloads/archive")
 
@@ -75,7 +76,7 @@ if __name__ == "__main__":
 
        #placeQrOnImage()
     #codedText = generateQr.codeText(texts[random.randrange(0, len(texts))])
-
+    """
     #qr = generateQr.fillImageWithData(codedText)
     #qr = generateQr.resizeQr(qr, 500)
     #cv2.imshow("img", qr)

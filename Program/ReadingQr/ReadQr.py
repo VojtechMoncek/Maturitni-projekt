@@ -490,7 +490,7 @@ if __name__ == "__main__":
     cam.release()
     """
 
-    img = cv2.imread("examples/example (7).jpg")
+    img = cv2.imread("examples/example (2).jpg")
     img = cv2.resize(img, (1000, 1000), interpolation=cv2.INTER_AREA)
     qrReader = QrReader(img)
     qrReader.main(img)
