@@ -44,7 +44,7 @@ class Main(MDApp):
     def __init__(self, **kwargs):
         # DOnt overwrite anything
         super(Main, self).__init__(**kwargs)
-
+        self.popups = []
         self.sm = ScreenManager(transition=NoTransition())
         self.settings = self.getSettings()
         self.url = ""
@@ -131,7 +131,7 @@ class Main(MDApp):
                 text=value,
                 buttons=[
                     MDFlatButton(
-                        text="Zavřít",
+                        text="Neukládat",
                         on_release=self.closePopup,
                         theme_text_color="Custom",
                         text_color=self.theme_cls.primary_color,
@@ -275,24 +275,28 @@ class Main(MDApp):
             def openPopup(_data):
                 print(_data)
                 self.openPopup("website", str(_data))
-            opup = partial(openPopup)
+            #opup = partial(openPopup)
+
             container.add_widget(
                 MDBoxLayout(
+
                     MDBoxLayout(
 
                         TwoLineListItem(
+                            id=f"popup_{i}",
                             divider=None,
                             text=date,
                             secondary_text=dList[i][1],
-                            on_release=opup
+                            #on_release= lambda x: openPopup(data)
                         ),
                         adaptive_height=True,
                     ),
+
                     adaptive_height=True,
                 ),
             )
         print("deti")
-        print(self.page.ids["history_content"].children)
+        print(self.page.ids["history_content"])
     def historyReturn(self):
         """
         Getting history from csv file
@@ -324,9 +328,9 @@ class Main(MDApp):
         else:
             gQr = generateQr.GenerateQr(50)
             imgQR = gQr.main(text)
-
+            cv2.imshow("qr", imgQR)
             cv2.cvtColor(imgQR, cv2.COLOR_BGR2RGB)
-            imgQR = cv2.rotate(imgQR, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            imgQR = cv2.flip(imgQR, 0)
             npQr = np.array(imgQR)
 
             texture = Texture.create(size=(imgQR.shape[1], imgQR.shape[0]), colorfmt='bgr')
@@ -345,3 +349,4 @@ class Main(MDApp):
 
 
 Main().run()
+cv2.waitKey(0)
