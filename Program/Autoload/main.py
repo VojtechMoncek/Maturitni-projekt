@@ -25,7 +25,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.list import TwoLineListItem
 
 from Program.generateQr import generateQr
-
+from Program.ReadingQr import ReadQr
 class GeneratePage(Screen):
     pass
 class InfoPage(Screen):
@@ -183,7 +183,11 @@ class Main(MDApp):
             value, points, straight_qrcode = detect.detectAndDecode(img)
             self.openPopup("website", value)
         else:
-            pass
+            img = cv2.resize(img, (round(img.shape[1] * 500 / img.shape[1]), round(img.shape[0] * 500 / img.shape[1])), interpolation=cv2.INTER_AREA)
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            cv2.imshow("neser a funguj", img)
+            qrReader = ReadQr.QrReader(img)
+            qrReader.main(img)
 
 
     def getFrame(self, *args):
@@ -205,7 +209,7 @@ class Main(MDApp):
 
         img = np.frombuffer(cam.texture.pixels, np.uint8)
         img = img.reshape(height, width, 4)
-        img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
+        #img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
 
         self.findQr(img)
 
