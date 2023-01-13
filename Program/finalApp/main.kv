@@ -4,7 +4,6 @@
         name: "NewPage"
 
         MDBottomNavigationItem:
-
             name: 'main'
             text: 'Sken'
             icon: 'camera'
@@ -12,7 +11,9 @@
             BoxLayout:
                 orientation: "vertical"
                 adaptive_height: True
+                
                 MDTopAppBar:
+
                     orientation: "horizontal"
                     title: "Sken"
                     IconRightWidget:
@@ -21,7 +22,15 @@
 
                 Camera:
                     id: camera
+                    width: self.texture_size[0]
                     play: True
+                    canvas.before:
+                        PushMatrix
+                        Rotate:
+                            angle: -90
+                            origin: self.center
+                    canvas.after:
+                        PopMatrix
 
 
 

@@ -1,31 +1,29 @@
-import csv
+#raws: 13, data: /fpjacb xhxhcbdj ipc
 import json
 import webbrowser
 from datetime import datetime
+import qrcode
 
 from kivy.graphics.texture import Texture
-from kivy.uix.boxlayout import BoxLayout
 from kivymd.app import MDApp
-import qrcode
 from kivy.core.image import Image as CoreImage
-from io import BytesIO
-from kivy.uix.button import Button
-from kivymd.uix.bottomnavigation import MDBottomNavigation
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDFloatingActionButtonSpeedDial, MDFlatButton
+from kivymd.uix.button import MDFlatButton
 from kivy.core.window import Window
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.clock import Clock
-
-from functools import partial
-import numpy as np
-import cv2
 from kivymd.uix.dialog import MDDialog
-from kivymd.uix.label import MDLabel
 from kivymd.uix.list import TwoLineListItem
 
-from Program.generateQr import generateQr
-from Program.ReadingQr import ReadQr
+from io import BytesIO
+import numpy as np
+import cv2
+
+
+import generateQr
+import ReadQr
+
+
 class GeneratePage(Screen):
     pass
 class InfoPage(Screen):
@@ -55,7 +53,7 @@ class Main(MDApp):
         :return:
         """
         #Frame rate
-        frameRate = self.page.ids["FrameRate"].text
+        #frameRate = self.page.ids["FrameRate"].text
         standardReading = self.page.ids["StandardReading"].active
         print(standardReading)
 
@@ -63,13 +61,13 @@ class Main(MDApp):
         self.settings["StandardReading"] = standardReading
         self.changeTexture()
 
-
+        """
         #FrameRate
         if self.page.ids["FrameRate"].text.isdigit() and int(frameRate) <= 99:
             self.settings["FrameRate"] = frameRate
         else:
             self.page.ids["FrameRate"].text = self.settings["FrameRate"]
-
+        """
 
         self.saveSettings(self.settings)
     def getSettings(self):
@@ -147,7 +145,7 @@ class Main(MDApp):
             )
         dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
         # print("date and time =", dt_string)
-        with open("history.csv", "a") as f:
+        with open("history.csv", "a", encoding="UTF-8") as f:
             f.write(f"{value};{dt_string}\n")
         self.createHistoryContent(self.page.ids["history_content"])
         self.url = value
@@ -155,7 +153,7 @@ class Main(MDApp):
         print(f"popup otevren   data: {value}")
 
         #webbrowser.open(value)
-    def closePopup(self, obj):
+    def closePopup(self, *obj):
         """
         close popup
         :param obj:
@@ -179,13 +177,14 @@ class Main(MDApp):
         :return:
         """
         if self.settings["StandardReading"] == True:
+            _qr = cv2.flip(img, -1)
+            _qr = cv2.flip(_qr, 1)
             detect = cv2.QRCodeDetector()
-            value, points, straight_qrcode = detect.detectAndDecode(img)
+            value, points, straight_qrcode = detect.detectAndDecode(_qr)
             self.openPopup("website", value)
         else:
             img = cv2.resize(img, (round(img.shape[1] * 500 / img.shape[1]), round(img.shape[0] * 500 / img.shape[1])), interpolation=cv2.INTER_AREA)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            cv2.imshow("neser a funguj", img)
             qrReader = ReadQr.QrReader(img)
             text = qrReader.main(img)
 
@@ -193,7 +192,7 @@ class Main(MDApp):
                 text = text.rstrip()
                 if text[0] == "u" and text[-1] == "u":
                     print(text)
-                    self.openPopup("website", text)
+                    self.openPopup("website", text[1:-2])
 
 
     def getFrame(self, *args):
@@ -209,7 +208,7 @@ class Main(MDApp):
         pixels = cameraTexture.pixels
 
         # cameraTexture.flip_horizontal()
-        img = np.frombuffer(pixels, np.uint8)
+        #img = np.frombuffer(pixels, np.uint8)
 
         height, width = cam.texture.height, cam.texture.width
 
@@ -246,7 +245,7 @@ class Main(MDApp):
         self.sm.add_widget(SettingsPage(name='settings'))
 
 
-        Window.size = (432, 768)
+        #Window.size = (432, 768)
         self.theme_cls.theme_style = "Dark"
 
         self.theme_cls.primary_palette = "Indigo"
@@ -254,8 +253,8 @@ class Main(MDApp):
         self.GeneratePage = GeneratePage()
         self.changeTexture()
         self.sm.current = "main"
-        print(self.settings["FrameRate"])
-        Clock.schedule_interval(self.getFrame, 1.0 / int(self.settings["FrameRate"]))
+        #print(self.settings["FrameRate"])
+        Clock.schedule_interval(self.getFrame, 1.0 / 24)
 
         print(self.page.ids)
 
@@ -269,6 +268,7 @@ class Main(MDApp):
         :return:
         """
         lines = self.historyReturn()
+
         print(len(container.children))
 
         while container.children:
@@ -312,9 +312,14 @@ class Main(MDApp):
         Getting history from csv file
         :return: All lines from csv
         """
-        with open("history.csv", "r") as f:
-            lines = f.readlines()
+        with open("history.csv", "r", encoding="utf-8") as f:
+            try:
+                lines = f.readlines()
+                print(lines)
+            except:
+                lines=["Historie se nepovedla načíst;"]
             return lines
+
 
     def changeTexture(self):
         """
@@ -338,13 +343,13 @@ class Main(MDApp):
         else:
             gQr = generateQr.GenerateQr(50)
             imgQR = gQr.main(text)
-            cv2.imshow("qr", imgQR)
             cv2.cvtColor(imgQR, cv2.COLOR_BGR2RGB)
             imgQR = cv2.flip(imgQR, 0)
+
             npQr = np.array(imgQR)
 
-            texture = Texture.create(size=(imgQR.shape[1], imgQR.shape[0]), colorfmt='bgr')
-            texture.blit_buffer(npQr.tobytes(), colorfmt='bgr', bufferfmt='ubyte')
+            texture = Texture.create(size=(imgQR.shape[1], imgQR.shape[0]), colorfmt='rgb')
+            texture.blit_buffer(npQr.tobytes(), colorfmt='rgb', bufferfmt='ubyte')
 
             img = self.page.ids["generatedQr"]
             img.texture = texture
@@ -354,9 +359,10 @@ class Main(MDApp):
 
     def saveQrImage(self, obj):
         print("saving QR")
-        self.openPopup("saveQr")
+        self.page.ids["generatedQr"].texture.save("qr.png")
+        self.closePopup()
+        #self.openPopup("saveQr")
 
 
 
 Main().run()
-cv2.waitKey(0)

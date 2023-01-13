@@ -53,6 +53,7 @@ class GenerateQr():
                 codedText += "00000"
             #print(char)
         codedText += "10101"
+
         return codedText
 
     def fillImageWithData(self, data):
@@ -104,6 +105,7 @@ class GenerateQr():
         cv2.imwrite(name, img)
 
     def main(self, text):
+
         codedText = self.codeText(text)
         qr = self.fillImageWithData(codedText)
         qr = self.resizeQr(qr, 500)
@@ -112,7 +114,8 @@ class GenerateQr():
 
 if __name__ == "__main__":
     generateQr = GenerateQr(50)
-    qr = generateQr.main("g tak kratkej")
+    txt = "rias gremory"
+    qr = generateQr.main(txt)
     """
     generateQr = GenerateQr(50)
     texts = ["masinou", "prosperujici", "vyzkumne", "pozitivnich", "podporovany", "informacnimi", "nepodminkovany", "potrebujeme nove vybaveni pro kancelar", "dneska se ucastnime konference", "nase firma se rozviji velmi rychle", "potrebujeme nove zamestnance", "vcera jsme se vratili z dovolene v Karibiku", "predstaveni noveho produktu se bude konat zitra vecer", "v nedeli rano se budeme venovat uklidu v parku", "nase skupina se bude zucastnovat mezinarodni vystavy v Nemecku", "na vylet do hor se chystame uz tento vikend", "nase spolecnost se specializuje na vyvoj aplikaci pro mobilni telefony", "dneska poobede se budeme schazet na porade o novych projektech", "v sobotu vecer se chystame na koncert oblibene kapely", "nase nove kancelarove prostory se nachazeji v centru mesta", "v patek odpoledne budeme mit prezentaci noveho projektu pred klienty", "v pristim mesici se budeme soustredit na rozsireni nasich sluzeb do dalsich statu", "v nasi firmi pracuji lidi z různých koutů světa", "v pondeli ráno se budeme věnovat schvalování nových smluv a dohod", "v úterý odpoledne se budeme účastnit konference o nových trendech v oboru", "naše společnost se zaměřuje na vývoj a výrobu inovativních technologií", "v pátek ráno se budeme scházet na poradě o plánování"]
@@ -126,6 +129,10 @@ if __name__ == "__main__":
     print(codedText)
 
     """
+    #qr = cv2.flip(qr, -1)
+    #qr = cv2.flip(qr, 1)
+    #qr = cv2.rotate(qr, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    #qr = cv2.flip(qr, 0)
     cv2.imshow("qr code - black", qr)
 
     cv2.waitKey(0)

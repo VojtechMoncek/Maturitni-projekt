@@ -1,4 +1,3 @@
-import math
 import time
 import cv2
 import numpy as np
@@ -19,7 +18,7 @@ class QrReader():
         try:
             self.img = img
             # self.img = resizedImg = cv2.resize(img, (self.height,self.width), interpolation=cv2.INTER_AREA)
-            # cv2.imshow("camera", img)
+
 
             self.grayImg = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
         except:
@@ -108,7 +107,7 @@ class QrReader():
         try:
             coordinates = np.float32(coordinates)
 
-            finalCoordinates = np.float32([[0, self.height], [self.width, self.height], [self.width, 0], [0, 0]])
+            finalCoordinates = np.float32([  [0, self.height] ,[0, 0],  [self.width, 0]  ,[self.width, self.height]  ])
 
 
             matrix = cv2.getPerspectiveTransform(coordinates, finalCoordinates)
@@ -263,7 +262,6 @@ class QrReader():
         #Meneni jasu
         ret, thresh_img = cv2.threshold(gray, self.brightness, 255, cv2.THRESH_BINARY)
 
-        cv2.imshow("thresh", thresh_img)
 
         #print(f"tf1.2 {time.time() - timeFceStart}")
         cnts = self.getContours(thresh_img)
@@ -275,7 +273,7 @@ class QrReader():
             cv2.drawContours(warpedQr, cnt, -1, (255,0,0), 3)
         except:
             pass
-        cv2.imshow("roh",warpedQr)
+
         if cnt == []: return warpedQr, 1, "Square in corner not found"
         warpedQr = cv2.resize(warpedQr, (250, 250))
         warpedQr = rotateQr(cnt)
@@ -430,7 +428,6 @@ class QrReader():
         return text, errorMessage
 
     def main(self, img):
-
         startTime = time.time()
 
         # resizedImg = cv2.resize(img, (1000,1000), interpolation=cv2.INTER_AREA)
@@ -450,13 +447,14 @@ class QrReader():
         brightness = brightness[0] * 0.59 + brightness[1] * 0.11 + brightness[2] * 0.3
         #print(f"br {brightness}")
         self.brightness = brightness * .85
-        #cv2.imshow("warpedQR", warpedQr)
+
         #print(f"t2 {time.time() - startTime}")
 
         # cv2.drawContours(warpedQr, fourPointContours, -1, (0, 0, 255), 3)
         # print(msg
 
         warpedQr, raws, msg = self.rotateQrAndGetNumberOfRaws(warpedQr)
+
         if raws == 1 or raws == 100:
             return ""
         else:
@@ -465,12 +463,13 @@ class QrReader():
         CryptedData, msg = self.readPixels(warpedQr, raws)
         #print(f"C data: {CryptedData}, {msg}", end=", ")
         if len(CryptedData) > 100: return ""
+        print(f"Crypted data: {CryptedData}")
         #if len(CryptedData) > 0: print(f"len crypted: {len(CryptedData)}")
         EncryptedData, msg = self.decodeData(CryptedData)
         finishTime = time.time() - startTime
         if len(EncryptedData) > 0:
             print(f"data: {EncryptedData}")
-            print(f"cas: {finishTime}")
+            #print(f"cas: {finishTime}")
         return EncryptedData
         """
         try:
@@ -509,7 +508,7 @@ if __name__ == "__main__":
     cam.release()
     """
 
-    img = cv2.imread("examples/qr (30).jpg")
+    img = cv2.imread("C:/Users/moncevo19/PycharmProjects/Maturitni-projekt/Program/ReadingQr/examples/qr (30).jpg")
 
     img = cv2.resize(img, ( round(img.shape[1] * 500/img.shape[1]), round(img.shape[0] * 500/img.shape[1])), interpolation=cv2.INTER_AREA)
     qrReader = QrReader(img)
