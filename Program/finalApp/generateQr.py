@@ -114,7 +114,7 @@ class GenerateQr():
 
 if __name__ == "__main__":
     generateQr = GenerateQr(50)
-    txt = "rias gremory"
+    txt = "rias"
     qr = generateQr.main(txt)
     """
     generateQr = GenerateQr(50)

@@ -1,5 +1,6 @@
 #raws: 13, data: /fpjacb xhxhcbdj ipc
 import json
+import time
 import webbrowser
 from datetime import datetime
 import qrcode
@@ -14,6 +15,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.clock import Clock
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import TwoLineListItem
+from kivy.config import Config
 
 from io import BytesIO
 import numpy as np
@@ -22,7 +24,12 @@ import cv2
 
 import generateQr
 import ReadQr
+from android.permissions import request_permissions, Permission
+import os
 
+os.environ["KIVY_ORIENTATION"] = "Portrait"
+Config.set('graphics', 'rotation', 0)
+Window.rotation = 0
 
 class GeneratePage(Screen):
     pass
@@ -176,6 +183,7 @@ class Main(MDApp):
         :param img: Image with qr
         :return:
         """
+        self.i += 1
         if self.settings["StandardReading"] == True:
             _qr = cv2.flip(img, -1)
             _qr = cv2.flip(_qr, 1)
@@ -183,6 +191,7 @@ class Main(MDApp):
             value, points, straight_qrcode = detect.detectAndDecode(_qr)
             self.openPopup("website", value)
         else:
+
             img = cv2.resize(img, (round(img.shape[1] * 500 / img.shape[1]), round(img.shape[0] * 500 / img.shape[1])), interpolation=cv2.INTER_AREA)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             qrReader = ReadQr.QrReader(img)
@@ -192,7 +201,10 @@ class Main(MDApp):
                 text = text.rstrip()
                 if text[0] == "u" and text[-1] == "u":
                     print(text)
-                    self.openPopup("website", text[1:-2])
+                    self.openPopup("website", text[1:-1])
+        if self.i % 30 == 0:
+            print(f"Total time: {time.time() - self.startTime}")
+            self.startTime = time.time()
 
 
     def getFrame(self, *args):
@@ -237,6 +249,8 @@ class Main(MDApp):
 
 
     def build(self):
+
+        request_permissions([Permission.CAMERA])
         self.page = NewPage()
         #self.sm.add_widget(GeneratePage(name='newGenerate'))
         self.sm.add_widget(GeneratePage(name='generate'))
@@ -254,6 +268,8 @@ class Main(MDApp):
         self.changeTexture()
         self.sm.current = "main"
         #print(self.settings["FrameRate"])
+        self.startTime = time.time()
+        self.i = 0
         Clock.schedule_interval(self.getFrame, 1.0 / 24)
 
         print(self.page.ids)

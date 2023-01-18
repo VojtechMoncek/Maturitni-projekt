@@ -31,6 +31,7 @@ class QrReader():
         if len(contours) == 0: errorMessage = "No contours in argument"
 
         newContours = []
+
         for contour in contours:
             try:
 
@@ -45,6 +46,7 @@ class QrReader():
                 #   newContours.append(approx)
             except:
                 pass
+
         if self.debug: print(f"    {len(newContours)} contours found")
 
         # print(newContours)
@@ -119,7 +121,6 @@ class QrReader():
         return warpedQr, errorMessage
 
     def rotateQrAndGetNumberOfRaws(self, warpedQr):
-        timeFceStart = time.time()
         errorMessage = ""
         if self.debug: print("__rotateQrAndGetNumberOfRaws__")
 
@@ -141,8 +142,6 @@ class QrReader():
 
                         convexHull = cv2.convexHull(contour)
                         approx = cv2.approxPolyDP(convexHull, .01 * cv2.arcLength(contour, True), True)
-                        rect = cv2.minAreaRect(approx)
-
 
                         if len(approx) == 4:
                             newContours.append(approx)
@@ -209,6 +208,7 @@ class QrReader():
                 if (square["left"] + self.width / 100) >= (self.width - square["right"]) and square[
                     "left"] - self.width / 100 <= (self.width - square["right"]):
                     continue
+
                 if self.width - square["right"] < square["left"]:
 
                     if self.width - square["right"] < closest:
@@ -291,6 +291,8 @@ class QrReader():
 
 
     def readPixels(self, warpedQr, raws):
+        startTime = time.time()
+        print(f"time0: {startTime}")
         errorMessage = ""
         if self.debug: print("\nreadPixels()")
 
@@ -299,28 +301,39 @@ class QrReader():
         #meneni jasu
         ret, thresh_img = cv2.threshold(warpedQr, self.brightness, 255, cv2.THRESH_BINARY)
         data = []
+        print(f"time1: {time.time() - startTime}")
+        half = pixelHeight
+        #print(f"half {half}")
+        intPixelHeight = round(pixelHeight)
+
+        newList = []
+        #print(thresh_img)
+
         for raw in range(0, raws):
             rawData = []
+            rawTimesPixelHeight = round(raw * pixelHeight)
             for collumn in range(0, raws):
-
                 pixelValue = 0
-                _pixel = thresh_img[round(raw * pixelHeight):round(raw * pixelHeight + pixelHeight),
-                         round(collumn * pixelHeight):round(collumn * pixelHeight + pixelHeight)]
+                _pixel = thresh_img[rawTimesPixelHeight:rawTimesPixelHeight + intPixelHeight,
+                         collumn * intPixelHeight:collumn * intPixelHeight + intPixelHeight]
                 pixel = _pixel.tolist()
+                #print(f"psize {len(pixel)}")
 
                 for x in pixel:
-                    if x.count([255, 255, 255]) > x.count([0, 0, 0]):
+                    #print(raw*collumn*len(x))
+                    if x.count([255, 255, 255]) > half:
                         pixelValue += 1
                     else:
                         pixelValue -= 1
+
 
                 if pixelValue < 0:
                     rawData.append(1)
                 else:
                     rawData.append(0)
-
             data.append(rawData)
         if len(data) == 0: errorMessage = "Loaded zero pixels"
+        print(f"time-1: {time.time() - startTime}")
         return data, errorMessage
 
     def decodeData(self, data):
@@ -328,8 +341,6 @@ class QrReader():
         if self.debug: print("\ndecodeData()")
 
         def removeBorders(data):
-            #print(data)
-            # return data
             if self.debug: print(f"    Data:")
             if self.debug: print(f"        With borders: {data}")
 
@@ -428,87 +439,68 @@ class QrReader():
         return text, errorMessage
 
     def main(self, img):
+        def polygon_area(points):
+            n = points.shape[0]
+            area = 0.0
+            for i in range(n):
+                j = (i + 1) % n
+                area += points[i, 0, 0] * points[j, 0, 1]
+                area -= points[j, 0, 0] * points[i, 0, 1]
+            area = abs(area) / 2.0
+            return area
+        #print()
         startTime = time.time()
-
-        # resizedImg = cv2.resize(img, (1000,1000), interpolation=cv2.INTER_AREA)
         self.loadImage(img)
+        #print(f"Img loaded: {time.time()-startTime}", end = "; ")
         contours, msg = self.getContours(self.grayImg)
         _image = self.grayImg.copy()
 
         fourPointContours, msg = self.getFourPointsContours(contours)
 
-        #print(f"t1 {time.time() - startTime}")
         biggestContour, msg = self.getBiggestContour(fourPointContours)
-
+        if type(biggestContour) == str:
+            return ""
+        #print(biggestContour)
+        BCnt = polygon_area(biggestContour)
+        #print(biggestContour)
+        #print(f"bcnt: {BCnt}")
+        #print(cv2.contourArea(biggestContour))
+        if BCnt < 100.0:
+            return ""
+        #print(f"biggest cnt found: {time.time() - startTime}", end="; ")
+        #print(f"bst cnt area: {cv2.contourArea(biggestContour)}")
         warpedQr, msg = self.warpQr(biggestContour)
         if warpedQr == "": return
         brightness =  warpedQr
         brightness = np.mean(brightness, axis=(0,1))
         brightness = brightness[0] * 0.59 + brightness[1] * 0.11 + brightness[2] * 0.3
-        #print(f"br {brightness}")
         self.brightness = brightness * .85
-
-        #print(f"t2 {time.time() - startTime}")
-
-        # cv2.drawContours(warpedQr, fourPointContours, -1, (0, 0, 255), 3)
-        # print(msg
+        #print(f"qr warped + brightness: {time.time() - startTime}", end="; ")
 
         warpedQr, raws, msg = self.rotateQrAndGetNumberOfRaws(warpedQr)
-
+        #print(f"Rotated + raws: {time.time() - startTime}", end="; ")
         if raws == 1 or raws == 100:
             return ""
         else:
-            print(f"raws: {raws}", end=", ")
-        #print(f"t3 {time.time() - startTime}")
+            pass
+            #print(f"raws: {raws}", end=", ")
         CryptedData, msg = self.readPixels(warpedQr, raws)
         #print(f"C data: {CryptedData}, {msg}", end=", ")
         if len(CryptedData) > 100: return ""
-        print(f"Crypted data: {CryptedData}")
+        #print(f"Crypted data: {CryptedData}")
         #if len(CryptedData) > 0: print(f"len crypted: {len(CryptedData)}")
         EncryptedData, msg = self.decodeData(CryptedData)
         finishTime = time.time() - startTime
-        if len(EncryptedData) > 0:
-            print(f"data: {EncryptedData}")
+        #if len(EncryptedData) > 0:
+        #    print(f"data: {EncryptedData}")
             #print(f"cas: {finishTime}")
+        #print()
+        #print(f"Main finish time{time.time() - startTime}")
         return EncryptedData
-        """
-        try:
-            self.loadImage(img)
-            contours = self.getContours(self.grayImg)
-            fourPointContours = self.getFourPointsContours(contours)
-            biggestContour = self.getBiggestContour(fourPointContours)
-            warpedQr = self.warpQr(biggestContour)
-            warpedQr, raws = self.rotateQrAndGetNumberOfRaws(warpedQr)
-            CryptedData = self.readPixels(warpedQr, raws-1)
-            EncryptedData = self.decodeData(CryptedData)
-            print(raws)
-            print(EncryptedData)
-        except Exception as e:
-            print("fail")
-            print(e)
-        """
-
-        # print("\n________________\n")
-        # print(f"Text: {EncryptedData}")
 
 
 if __name__ == "__main__":
-    """
-    cam = cv2.VideoCapture(0)
-    img = cv2.imread("example4.jpg")
-    qrReader = QrReader(img)
-    qrReader.debug = 0
-    while True:
-        ret, frame = cam.read()
-        cv2.imshow("kamera", frame)
-        if cv2.waitKey(1) & 0xFF == ord('x'):
-            qrReader.main(frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-    cam.release()
-    """
-
-    img = cv2.imread("C:/Users/moncevo19/PycharmProjects/Maturitni-projekt/Program/ReadingQr/examples/qr (30).jpg")
+    img = cv2.imread("C:/Users/moncevo19/PycharmProjects/Maturitni-projekt/Program/ReadingQr/examples/qr (3).jpg")
 
     img = cv2.resize(img, ( round(img.shape[1] * 500/img.shape[1]), round(img.shape[0] * 500/img.shape[1])), interpolation=cv2.INTER_AREA)
     qrReader = QrReader(img)
@@ -517,7 +509,3 @@ if __name__ == "__main__":
 
 
 
-
-
-
-    cv2.waitKey(-1)

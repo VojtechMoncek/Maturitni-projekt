@@ -13,7 +13,7 @@ package.domain = org.test
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,atlas
+source.include_exts = py,png,jpg,kv,atlas,csv,json
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
@@ -37,7 +37,7 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,qrcode,pillow,numpy,opencv
+requirements = python3,kivy,qrcode,pillow,numpy,opencv==4.6.0,kivymd
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -47,7 +47,7 @@ requirements = python3,kivy,qrcode,pillow,numpy,opencv
 #presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+icon.filename = icon.png
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -93,7 +93,7 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = INTERNET,CAMERA
+android.permissions = INTERNET,CAMERA,SET_ORIENTATION
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
@@ -102,7 +102,7 @@ android.permissions = INTERNET,CAMERA
 #android.api = 27
 
 # (int) Minimum API your APK / AAB will support.
-#android.minapi = 21
+android.minapi = 13
 
 # (int) Android SDK version to use
 #android.sdk = 20
