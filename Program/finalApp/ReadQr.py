@@ -262,7 +262,7 @@ class QrReader():
         #Meneni jasu
         ret, thresh_img = cv2.threshold(gray, self.brightness, 255, cv2.THRESH_BINARY)
 
-
+        cv2.imshow("thrsh", thresh_img)
         #print(f"tf1.2 {time.time() - timeFceStart}")
         cnts = self.getContours(thresh_img)
         #print(f"tf1.3 {time.time() - timeFceStart}")
@@ -286,6 +286,7 @@ class QrReader():
         if pixelHeight < 1: errorMessage = "pixelHeight == 0"; pixelHeight = 10
         raws = abs(round(self.width / pixelHeight))
         #print(f"tf4 {time.time() - timeFceStart}")
+        print(raws)
         return warpedQr, raws, errorMessage
 
 
@@ -299,7 +300,10 @@ class QrReader():
         pixelHeight = len(warpedQr) / raws
         if self.debug: print(f"    Pixel Height: {pixelHeight}px (raws: {raws})")
         #meneni jasu
+        print(warpedQr.shape)
+        cv2.imshow("sadf", warpedQr)
         ret, thresh_img = cv2.threshold(warpedQr, self.brightness, 255, cv2.THRESH_BINARY)
+        #cv2.imshow("thrs2", thresh_img)
         data = []
         print(f"time1: {time.time() - startTime}")
         half = pixelHeight
@@ -321,19 +325,24 @@ class QrReader():
 
                 for x in pixel:
                     #print(raw*collumn*len(x))
-                    if x.count([255, 255, 255]) > half:
+                    if x.count([255, 255, 255]) > x.count([0, 0, 0]):
                         pixelValue += 1
+                        #print("white")
                     else:
                         pixelValue -= 1
+                        #print("black")
 
 
                 if pixelValue < 0:
                     rawData.append(1)
                 else:
                     rawData.append(0)
+
             data.append(rawData)
         if len(data) == 0: errorMessage = "Loaded zero pixels"
+
         print(f"time-1: {time.time() - startTime}")
+        print(errorMessage, data)
         return data, errorMessage
 
     def decodeData(self, data):
@@ -479,6 +488,7 @@ class QrReader():
 
         warpedQr, raws, msg = self.rotateQrAndGetNumberOfRaws(warpedQr)
         #print(f"Rotated + raws: {time.time() - startTime}", end="; ")
+        cv2.imshow("wq", warpedQr)
         if raws == 1 or raws == 100:
             return ""
         else:
@@ -490,12 +500,7 @@ class QrReader():
         #print(f"Crypted data: {CryptedData}")
         #if len(CryptedData) > 0: print(f"len crypted: {len(CryptedData)}")
         EncryptedData, msg = self.decodeData(CryptedData)
-        finishTime = time.time() - startTime
-        #if len(EncryptedData) > 0:
-        #    print(f"data: {EncryptedData}")
-            #print(f"cas: {finishTime}")
-        #print()
-        #print(f"Main finish time{time.time() - startTime}")
+        print(EncryptedData)
         return EncryptedData
 
 
@@ -505,7 +510,7 @@ if __name__ == "__main__":
     img = cv2.resize(img, ( round(img.shape[1] * 500/img.shape[1]), round(img.shape[0] * 500/img.shape[1])), interpolation=cv2.INTER_AREA)
     qrReader = QrReader(img)
     text = qrReader.main(img)
-
+    #cv2.waitKey(0)
 
 
 

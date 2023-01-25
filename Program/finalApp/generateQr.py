@@ -7,7 +7,7 @@ class GenerateQr():
         self.width = width
         self.height = width
         self.pixelWidth = width
-        self.additionalDataLenght = 16 + 10
+        self.additionalDataLenght = 16
 
     def codeText(self, text):
 
@@ -55,16 +55,36 @@ class GenerateQr():
         codedText += "10101"
 
         return codedText
+    def addMask(self, codedText):
+        newText = ""
+        print()
+        edge = math.ceil((len(codedText) + 16) ** (1/2) )# size without borders
+        size = edge ** 2 - 16
+        whiteSpaces = size - len(codedText)
+        codedText += "0"*whiteSpaces
 
+        print(whiteSpaces)
+        print(len(codedText) + 16)
+        for i, pixel in enumerate(codedText):
+            #if i % 2 == 0:
+            #    if pixel == "0":
+            #        pixel = "1"
+            #    else:
+            #        pixel = "0"
+            if pixel == "0":
+                pixel = "1"
+            else:
+                pixel = "0"
+            newText += pixel
+
+        return newText
+    def getSize(self, textLenght):
+        lenght = textLenght + self.additionalDataLenght
+        widthNoBorders = math.ceil(lenght ** (1 / 2))
+        widthWithBorders = widthNoBorders + 4
+        return widthWithBorders
     def fillImageWithData(self, data):
-
-        def getSize(textLenght):
-            lenght = textLenght + self.additionalDataLenght
-            widthNoBorders = math.ceil(lenght ** (1 / 2))
-            widthWithBorders = widthNoBorders + 4
-            return widthWithBorders
-
-        columns = getSize(len(data))
+        columns = self.getSize(len(data))
         self.width = self.pixelWidth * columns
         self.height = self.pixelWidth * columns
         img = np.zeros((self.pixelWidth * columns, self.pixelWidth * columns, 3), dtype=np.uint8)
@@ -107,6 +127,7 @@ class GenerateQr():
     def main(self, text):
 
         codedText = self.codeText(text)
+        codedText = self.addMask(codedText)
         qr = self.fillImageWithData(codedText)
         qr = self.resizeQr(qr, 500)
         return qr
@@ -114,7 +135,7 @@ class GenerateQr():
 
 if __name__ == "__main__":
     generateQr = GenerateQr(50)
-    txt = "rias"
+    txt = "     "
     qr = generateQr.main(txt)
     """
     generateQr = GenerateQr(50)

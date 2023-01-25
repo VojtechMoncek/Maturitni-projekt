@@ -24,13 +24,13 @@ import cv2
 
 import generateQr
 import ReadQr
-from android.permissions import request_permissions, Permission
+#from android.permissions import request_permissions, Permission
 import os
 
 os.environ["KIVY_ORIENTATION"] = "Portrait"
 Config.set('graphics', 'rotation', 0)
 Window.rotation = 0
-
+"""
 class GeneratePage(Screen):
     pass
 class InfoPage(Screen):
@@ -43,8 +43,10 @@ class MainPage(Screen):
 
 class newGeneratePage(Screen):
     pass
+"""
 class NewPage(Screen):
     pass
+
 class Main(MDApp):
     def __init__(self, **kwargs):
         # DOnt overwrite anything
@@ -226,7 +228,7 @@ class Main(MDApp):
 
         img = np.frombuffer(cam.texture.pixels, np.uint8)
         img = img.reshape(height, width, 4)
-        #img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2GRAY)
 
         self.findQr(img)
 
@@ -250,13 +252,13 @@ class Main(MDApp):
 
     def build(self):
 
-        request_permissions([Permission.CAMERA])
+        #request_permissions([Permission.CAMERA])
         self.page = NewPage()
         #self.sm.add_widget(GeneratePage(name='newGenerate'))
-        self.sm.add_widget(GeneratePage(name='generate'))
-        self.sm.add_widget(InfoPage(name='info'))
-        self.sm.add_widget(MainPage(name='main'))
-        self.sm.add_widget(SettingsPage(name='settings'))
+        #self.sm.add_widget(GeneratePage(name='generate'))
+        #self.sm.add_widget(InfoPage(name='info'))
+        #self.sm.add_widget(MainPage(name='main'))
+        #self.sm.add_widget(SettingsPage(name='settings'))
 
 
         #Window.size = (432, 768)
@@ -264,9 +266,9 @@ class Main(MDApp):
 
         self.theme_cls.primary_palette = "Indigo"
 
-        self.GeneratePage = GeneratePage()
+        #self.GeneratePage = GeneratePage()
         self.changeTexture()
-        self.sm.current = "main"
+        #self.sm.current = "main"
         #print(self.settings["FrameRate"])
         self.startTime = time.time()
         self.i = 0
@@ -299,30 +301,31 @@ class Main(MDApp):
             dList.append((date, data))
             print("data: " + data)
             def openPopup(_data):
-                print(_data)
+                #print(_data)
                 self.openPopup("website", str(_data))
             #opup = partial(openPopup)
 
-            container.add_widget(
+
+            historyBox = MDBoxLayout(
+
                 MDBoxLayout(
 
-                    MDBoxLayout(
-
-                        TwoLineListItem(
-                            id=f"popup_{i}",
-                            divider=None,
-                            text=date,
-                            secondary_text=dList[i][1],
-                            #on_release= lambda x: openPopup(data)
-                        ),
-                        adaptive_height=True,
+                    TwoLineListItem(
+                        id=f"popup_{i}",
+                        divider=None,
+                        text=date,
+                        secondary_text=data,
+                        on_release= lambda y, x = data: openPopup(x)
                     ),
-
                     adaptive_height=True,
                 ),
+
+                adaptive_height=True,
             )
-        print("deti")
-        print(self.page.ids["history_content"])
+
+            container.add_widget(historyBox)
+            print("deti")
+            print(data)
     def historyReturn(self):
         """
         Getting history from csv file
@@ -382,3 +385,4 @@ class Main(MDApp):
 
 
 Main().run()
+cv2.waitKey(0)
