@@ -1,49 +1,40 @@
 #raws: 13, data: /fpjacb xhxhcbdj ipc
 import json
+
+import os
 import time
 import webbrowser
 from datetime import datetime
+from io import BytesIO
+
+import cv2
+import numpy as np
 import qrcode
 
-from kivy.graphics.texture import Texture
-from kivymd.app import MDApp
+from kivy.clock import Clock
+from kivy.config import Config
 from kivy.core.image import Image as CoreImage
+from kivy.core.window import Window
+from kivy.graphics.texture import Texture
+from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
+from kivymd.app import MDApp
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDFlatButton
-from kivy.core.window import Window
-from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
-from kivy.clock import Clock
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import TwoLineListItem
-from kivy.config import Config
+from kivy.utils import platform
 
-from io import BytesIO
-import numpy as np
-import cv2
-
-
-import generateQr
+from plyer import notification
 import ReadQr
-#from android.permissions import request_permissions, Permission
-import os
+import generateQr
+
+if platform == "android":
+    from android.permissions import request_permissions, Permission, check_permission
 
 os.environ["KIVY_ORIENTATION"] = "Portrait"
 Config.set('graphics', 'rotation', 0)
 Window.rotation = 0
-"""
-class GeneratePage(Screen):
-    pass
-class InfoPage(Screen):
-    pass
-class SettingsPage(Screen):
-    pass
-class MainPage(Screen):
-    pass
 
-
-class newGeneratePage(Screen):
-    pass
-"""
 class NewPage(Screen):
     pass
 
@@ -52,7 +43,6 @@ class Main(MDApp):
         # DOnt overwrite anything
         super(Main, self).__init__(**kwargs)
         self.popups = []
-        self.sm = ScreenManager(transition=NoTransition())
         self.settings = self.getSettings()
         self.url = ""
 
@@ -61,24 +51,15 @@ class Main(MDApp):
         update settings and check if values are possible to set
         :return:
         """
-        #Frame rate
-        #frameRate = self.page.ids["FrameRate"].text
+
         standardReading = self.page.ids["StandardReading"].active
         print(standardReading)
 
         #Which reading use
         self.settings["StandardReading"] = standardReading
         self.changeTexture()
-
-        """
-        #FrameRate
-        if self.page.ids["FrameRate"].text.isdigit() and int(frameRate) <= 99:
-            self.settings["FrameRate"] = frameRate
-        else:
-            self.page.ids["FrameRate"].text = self.settings["FrameRate"]
-        """
-
         self.saveSettings(self.settings)
+
     def getSettings(self):
         """
         return json data in dic
@@ -108,7 +89,7 @@ class Main(MDApp):
         #self.page.ids["generatedQr"].texture.save("qr.png")
         if isinstance(MDApp.get_running_app().root_window.children[0], MDDialog): return
 
-        if actionType == "website":
+        if actionType == "website" or actionType == "website-history":
             if value == "": return
             print("# website")
             self.popup = MDDialog(
@@ -131,7 +112,12 @@ class Main(MDApp):
 
 
             )
-
+            if actionType == "website":
+                dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
+                # print("date and time =", dt_string)
+                with open("history.csv", "a", encoding="UTF-8") as f:
+                    f.write(f"{value};{dt_string}\n")
+                self.createHistoryContent(self.page.ids["history_content"])
         elif actionType == "saveQr":
             self.popup = MDDialog(
                 title="Uložit Qr kód?",
@@ -152,11 +138,7 @@ class Main(MDApp):
                 ]
 
             )
-        dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
-        # print("date and time =", dt_string)
-        with open("history.csv", "a", encoding="UTF-8") as f:
-            f.write(f"{value};{dt_string}\n")
-        self.createHistoryContent(self.page.ids["history_content"])
+
         self.url = value
         self.popup.open()
         print(f"popup otevren   data: {value}")
@@ -180,11 +162,13 @@ class Main(MDApp):
 
 
     def findQr(self, img):
+
         """
         Find qr code from image
         :param img: Image with qr
         :return:
         """
+
         self.i += 1
         if self.settings["StandardReading"] == True:
             _qr = cv2.flip(img, -1)
@@ -193,7 +177,6 @@ class Main(MDApp):
             value, points, straight_qrcode = detect.detectAndDecode(_qr)
             self.openPopup("website", value)
         else:
-
             img = cv2.resize(img, (round(img.shape[1] * 500 / img.shape[1]), round(img.shape[0] * 500 / img.shape[1])), interpolation=cv2.INTER_AREA)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             qrReader = ReadQr.QrReader(img)
@@ -204,6 +187,7 @@ class Main(MDApp):
                 if text[0] == "u" and text[-1] == "u":
                     print(text)
                     self.openPopup("website", text[1:-1])
+
         if self.i % 30 == 0:
             print(f"Total time: {time.time() - self.startTime}")
             self.startTime = time.time()
@@ -232,44 +216,26 @@ class Main(MDApp):
 
         self.findQr(img)
 
-    def changePage(self, name):
-        """
-        Turning off and on camera
-        :param name: Name of new page
-        :return:
-        """
-        self.sm.current = name
-
-        if self.sm.current == "main":
-            self.sm.get_screen(name).ids["camera"].play = False
-
-
-
-        if self.sm.current == "main":
-            self.sm.get_screen(name).ids["camera"].play = True
-
+    def changePage(self, turnOn):
+        self.page.ids["camera"].play = turnOn
 
 
     def build(self):
 
-        #request_permissions([Permission.CAMERA])
+        if platform == "android":
+            while check_permission("android.permission.CAMERA") == False:
+                request_permissions([Permission.CAMERA])
+
+
         self.page = NewPage()
-        #self.sm.add_widget(GeneratePage(name='newGenerate'))
-        #self.sm.add_widget(GeneratePage(name='generate'))
-        #self.sm.add_widget(InfoPage(name='info'))
-        #self.sm.add_widget(MainPage(name='main'))
-        #self.sm.add_widget(SettingsPage(name='settings'))
 
-
-        #Window.size = (432, 768)
         self.theme_cls.theme_style = "Dark"
 
         self.theme_cls.primary_palette = "Indigo"
 
-        #self.GeneratePage = GeneratePage()
+
         self.changeTexture()
-        #self.sm.current = "main"
-        #print(self.settings["FrameRate"])
+
         self.startTime = time.time()
         self.i = 0
         Clock.schedule_interval(self.getFrame, 1.0 / 24)
@@ -302,8 +268,7 @@ class Main(MDApp):
             print("data: " + data)
             def openPopup(_data):
                 #print(_data)
-                self.openPopup("website", str(_data))
-            #opup = partial(openPopup)
+                self.openPopup("website-history", str(_data))
 
 
             historyBox = MDBoxLayout(
@@ -377,12 +342,26 @@ class Main(MDApp):
             self.page.ids["generatedQr"].texture = img.texture
 
     def saveQrImage(self, obj):
+        dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
         print("saving QR")
-        self.page.ids["generatedQr"].texture.save("qr.png")
+        if platform == "android":
+            path = os.path.join(os.environ["EXTERNAL_STORAGE"], "Download")
+            print(f"path: {path}/qr.png")
+            self.page.ids["generatedQr"].texture.save(f"{path}/qr - {dt_string}.png")
+        else:
+            self.page.ids["generatedQr"].texture.save(f"qr - {dt_string}.png")
+
+        notification.notify(
+            title=f"qr - {dt_string}.png",
+            message="Úspěšně uloženo do \"stažené soubory\"",
+            #app_name="Čtečka qr",
+            timeout=10,
+            #action=openFile()
+        )
         self.closePopup()
         #self.openPopup("saveQr")
 
 
-
 Main().run()
-cv2.waitKey(0)
+
+if platform != "android": cv2.waitKey(0)

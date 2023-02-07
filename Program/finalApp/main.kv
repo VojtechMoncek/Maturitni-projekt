@@ -7,30 +7,42 @@
             name: 'main'
             text: 'Sken'
             icon: 'camera'
+            padding: "0dp"
+            on_tab_touch_up: app.changePage(True)
 
             BoxLayout:
                 orientation: "vertical"
                 adaptive_height: True
 
                 MDTopAppBar:
-
-                    orientation: "horizontal"
+                    #orientation: "horizontal"
                     title: "Skenování Qr kódu"
-                    IconRightWidget:
-                        icon: "camera"
+                    right_action_items: [["camera"]]
+
+                    #IconRightWidget:
+                    #    icon: "camera"
 
 
                 Camera:
                     id: camera
-                    width: self.texture_size[0]
+
+                    #print(root.width)
+                    #print(self.width)
+                    #resolution: (800,800)
+                    #size_hint: None, None
                     play: True
+
                     canvas.before:
+
                         PushMatrix
                         Rotate:
                             angle: -90
                             origin: self.center
+
                     canvas.after:
                         PopMatrix
+                    #size_hint: root.width, root.height
+                    #width: root.width
 
 
 
@@ -40,15 +52,14 @@
             name: 'generate'
             text: 'Generovat'
             icon: 'qrcode'
+            on_tab_touch_up: app.changePage(False)
 
             BoxLayout:
                 orientation: "vertical"
                 adaptive_height: True
                 MDTopAppBar:
-                    orientation: "horizontal"
                     title: "Generovat"
-                    IconRightWidget:
-                        icon: "qrcode"
+                    right_action_items: [["qrcode"]]
 
                 MDBoxLayout:
                     orientation: "vertical"
@@ -75,26 +86,18 @@
 
 
 
-
-
-
-
-
-
-
         MDBottomNavigationItem:
             name: 'history'
             text: 'Historie'
             icon: 'history'
+            on_tab_touch_up: app.changePage(False)
 
             BoxLayout:
                 orientation: "vertical"
                 adaptive_height: True
                 MDTopAppBar:
-                    orientation: "horizontal"
                     title: "Historie"
-                    IconRightWidget:
-                        icon: "history"
+                    right_action_items: [["history"]]
                 ScrollView:
                     MDBoxLayout:
                         id: history_content
@@ -109,15 +112,14 @@
             name: 'newGenerate'
             text: 'Nastavení'
             icon: 'cog'
+            on_tab_touch_up: app.changePage(False)
 
             BoxLayout:
                 orientation: "vertical"
                 adaptive_height: True
                 MDTopAppBar:
-                    orientation: "horizontal"
                     title: "Nastavení"
-                    IconRightWidget:
-                        icon: "cog"
+                    right_action_items: [["cog"]]
                 ScrollView:
                     MDBoxLayout:
                         orientation: "vertical"
@@ -134,7 +136,6 @@
                                 secondary_text: ""
                             MDSwitch:
                                 id: StandardReading
-                                md_bg_color: [0, 0, 0, 0]
                                 pos_hint: {"center_y":0.4}
                                 active: app.settings['StandardReading']
                                 on_active: app.updateSettings()
@@ -197,66 +198,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<MySettingsCard@MDBoxLayout>
-    MDBoxLayout:
-        adaptive_height: True
-        TwoLineListItem:
-            divider: None
-            text: "ahoj"
-            secondary_text: "Ahoj jak se mas"
-        MDSwitch:
-            pos_hint: {"center_y":0.4}
 <MyHeader@MDLabel>
     bold: True
     text: "Header"
     color: "gray"
     adaptive_height: True
-<GeneratePage>:
-    name: "generate"
-    MDTopAppBar:
-        title: "title"
-    #MyHeader:
-    FloatLayout:
-        #size_hint_x: None
-
-        MDTextField:
-            id: input
-            on_text_validate: app.changeTexture()
-
-            pos_hint: {'center_x':0.5,'center_y': 0.85}
-            hint_text: "Text"
-            color: "Black"
-            size_hint_x: 0.5
-
-            AnchorLayout:
-                padding: "40dp"
-                on_touch_up: print("touch up")
-                on_touch_down: print("touch down")
-                #spacing: 100
-                Button:
-                    text: "aaaaaaaaaaaaaaaaa"
-
-                    #id: generatedQr
-                    on_touch_up: app.saveQrImage()
-                    on_touch_up: print("touch up")
-                    on_touch_down: print("touch down")
 
 
 

@@ -1,7 +1,7 @@
 import time
 import cv2
 import numpy as np
-
+from kivy.utils import platform
 
 class QrReader():
     def __init__(self, img, height=1000, width=1000):
@@ -262,7 +262,7 @@ class QrReader():
         #Meneni jasu
         ret, thresh_img = cv2.threshold(gray, self.brightness, 255, cv2.THRESH_BINARY)
 
-        cv2.imshow("thrsh", thresh_img)
+        if platform != "android": cv2.imshow("thrsh", thresh_img)
         #print(f"tf1.2 {time.time() - timeFceStart}")
         cnts = self.getContours(thresh_img)
         #print(f"tf1.3 {time.time() - timeFceStart}")
@@ -301,7 +301,7 @@ class QrReader():
         if self.debug: print(f"    Pixel Height: {pixelHeight}px (raws: {raws})")
         #meneni jasu
         print(warpedQr.shape)
-        cv2.imshow("sadf", warpedQr)
+        if platform != "android": cv2.imshow("sadf", warpedQr)
         ret, thresh_img = cv2.threshold(warpedQr, self.brightness, 255, cv2.THRESH_BINARY)
         #cv2.imshow("thrs2", thresh_img)
         data = []
@@ -488,7 +488,7 @@ class QrReader():
 
         warpedQr, raws, msg = self.rotateQrAndGetNumberOfRaws(warpedQr)
         #print(f"Rotated + raws: {time.time() - startTime}", end="; ")
-        cv2.imshow("wq", warpedQr)
+        if platform != "android": cv2.imshow("wq", warpedQr)
         if raws == 1 or raws == 100:
             return ""
         else:

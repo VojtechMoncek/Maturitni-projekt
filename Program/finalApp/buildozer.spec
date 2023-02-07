@@ -37,14 +37,14 @@ version = 0.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,qrcode,pillow,numpy,opencv==4.6.0,kivymd
+requirements = python3,kivy,qrcode,pillow,numpy,opencv==4.6.0,kivymd==1.0.2,typing-extensions,android,pypng,plyer
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = presplash.png
 
 # (str) Icon of the application
 icon.filename = icon.png
@@ -93,16 +93,16 @@ fullscreen = 0
 #icon.adaptive_background.filename = %(source.dir)s/data/icon_bg.png
 
 # (list) Permissions
-android.permissions = INTERNET,CAMERA,SET_ORIENTATION
+android.permissions = INTERNET,CAMERA,SET_ORIENTATION,WRITE_EXTERNAL_STORAGE
 
 # (list) features (adds uses-feature -tags to manifest)
-#android.features = android.hardware.usb.host
+#android.features = android.hardware.accelerated
 
 # (int) Target Android API, should be as high as possible.
 #android.api = 27
 
 # (int) Minimum API your APK / AAB will support.
-android.minapi = 13
+#android.minapi = 13
 
 # (int) Android SDK version to use
 #android.sdk = 20

@@ -127,7 +127,7 @@ class GenerateQr():
     def main(self, text):
 
         codedText = self.codeText(text)
-        codedText = self.addMask(codedText)
+        #codedText = self.addMask(codedText)
         qr = self.fillImageWithData(codedText)
         qr = self.resizeQr(qr, 500)
         return qr
@@ -135,7 +135,7 @@ class GenerateQr():
 
 if __name__ == "__main__":
     generateQr = GenerateQr(50)
-    txt = "     "
+    txt = "Ahoj jak se mas ja se mam skvele a vubec mi nehrabe y maturitniho projektu aaa pomoc je to fakt des a bess a hruya"
     qr = generateQr.main(txt)
     """
     generateQr = GenerateQr(50)
