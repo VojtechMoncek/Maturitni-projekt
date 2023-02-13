@@ -25,25 +25,17 @@
 
                 Camera:
                     id: camera
-
-                    #print(root.width)
-                    #print(self.width)
-                    #resolution: (800,800)
-                    #size_hint: None, None
                     play: True
 
                     canvas.before:
-
                         PushMatrix
                         Rotate:
                             angle: -90
                             origin: self.center
 
+
                     canvas.after:
                         PopMatrix
-                    #size_hint: root.width, root.height
-                    #width: root.width
-
 
 
 

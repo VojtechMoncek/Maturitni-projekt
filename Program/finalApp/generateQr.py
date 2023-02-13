@@ -135,7 +135,7 @@ class GenerateQr():
 
 if __name__ == "__main__":
     generateQr = GenerateQr(50)
-    txt = "Ahoj jak se mas ja se mam skvele a vubec mi nehrabe y maturitniho projektu aaa pomoc je to fakt des a bess a hruya"
+    txt = "ahoj"
     qr = generateQr.main(txt)
     """
     generateQr = GenerateQr(50)

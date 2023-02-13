@@ -23,6 +23,7 @@ from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import TwoLineListItem
 from kivy.utils import platform
+from kivy.uix.widget import Widget
 
 from plyer import notification
 import ReadQr
@@ -35,6 +36,8 @@ os.environ["KIVY_ORIENTATION"] = "Portrait"
 Config.set('graphics', 'rotation', 0)
 Window.rotation = 0
 
+class RotatedWidget(Widget):
+    pass
 class NewPage(Screen):
     pass
 
@@ -344,6 +347,9 @@ class Main(MDApp):
     def saveQrImage(self, obj):
         dt_string = datetime.now().strftime("%d.%m. %Y %H:%M")
         print("saving QR")
+        """
+        do cestyksouboru se za pomoci knihovny os uklada cesta ke stazenym souborum v androidu
+        """
         if platform == "android":
             path = os.path.join(os.environ["EXTERNAL_STORAGE"], "Download")
             print(f"path: {path}/qr.png")
